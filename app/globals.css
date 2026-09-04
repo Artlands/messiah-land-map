@@ -275,3 +275,15 @@ footer a { justify-self: end; }
 .map-marker.no-label:hover .marker-label,
 .map-marker.no-label:focus-visible .marker-label { display: block; }
 .map-marker.no-label:hover, .map-marker.no-label:focus-visible { z-index: 500 !important; }
+
+.script-toggle {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid rgba(210, 187, 132, .33); background: rgba(255,255,255,.02);
+  padding: 9px 13px; cursor: pointer; color: #a8aca4;
+  font: 11px Georgia, "Songti SC", serif; letter-spacing: .12em;
+}
+.script-toggle:hover { border-color: rgba(210, 187, 132, .6); }
+.script-toggle i { width: 1px; height: 11px; background: var(--line); }
+.script-toggle span { opacity: .4; transition: opacity .2s, color .2s; }
+:root:not([data-script="hant"]) .script-toggle span:first-of-type,
+:root[data-script="hant"] .script-toggle span:last-of-type { opacity: 1; color: var(--gold-bright); }

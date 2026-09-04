@@ -12,7 +12,8 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "build:static": "vite build --config vite.static.config.ts",
     "preview:static": "vite preview --config vite.static.config.ts",
-    "verify": "node scripts/verify-map-data.mjs"
+    "verify": "node scripts/verify-map-data.mjs",
+    "build:zh": "node scripts/build-zh-hant.mjs"
   },
   "dependencies": {
     "next": "16.2.6",
@@ -31,6 +32,7 @@
     "@vitejs/plugin-rsc": "0.5.26",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
+    "opencc-js": "^1.4.2",
     "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { places, themes, type Place, type ThemeFilter } from './places';
 import { regionLabels, regions, peaks, lakes } from './geo';
+import { toTraditional } from './zh-hant';
 import {
   drawScene, elevationAt, elevationRange, hypsometric, makeFrame, normLat, normLon,
   project, regionAt, relief, RULER_TINT, type Frame, type View,
@@ -82,6 +83,9 @@ export default function Home() {
   const [showRegions, setShowRegions] = useState(true);
   const [showTowns, setShowTowns] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [script, setScript] = useState<'hans' | 'hant'>(() =>
+    typeof window !== 'undefined' && localStorage.getItem('script') === 'hant' ? 'hant' : 'hans',
+  );
   const { ref: mapRef, size } = useSize<HTMLDivElement>();
   const dragRef = useRef<{ x: number; y: number; rotation: number; tilt: number } | null>(null);
 
@@ -150,6 +154,62 @@ export default function Home() {
     selectPlace(story[(base + delta + story.length) % story.length]);
   };
 
+  /**
+   * Simplified ⇄ traditional. Every visible string is authored in simplified
+   * Chinese and lives in the DOM (the canvas draws no text), so the conversion
+   * runs over text nodes after each render rather than threading a translation
+   * call through every component. Anything inside [data-no-convert] is left
+   * alone — the toggle has to keep showing 简 and 繁 in their own scripts.
+   *
+   * `rendered` is what we last wrote. If a node no longer matches it, React has
+   * replaced the text and the new value becomes the source.
+   */
+  const written = useRef(new WeakMap<Node, { source: string; rendered: string }>());
+  const converted = useRef(false);
+  useEffect(() => {
+    if (script === 'hans' && !converted.current) return;
+    converted.current = script === 'hant';
+    document.documentElement.dataset.script = script;
+    document.documentElement.lang = script === 'hant' ? 'zh-Hant' : 'zh-CN';
+
+    const store = written.current;
+    const swap = (node: Node, read: () => string, write: (value: string) => void) => {
+      const record = store.get(node);
+      const current = read();
+      const source = record && current === record.rendered ? record.source : current;
+      if (script === 'hant') {
+        const rendered = toTraditional(source);
+        if (current !== rendered) write(rendered);
+        store.set(node, { source, rendered });
+      } else if (record) {
+        if (current !== source) write(source);
+        store.delete(node);
+      }
+    };
+
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) =>
+          node.nodeType === Node.ELEMENT_NODE
+            ? (node as Element).hasAttribute('data-no-convert')
+              ? NodeFilter.FILTER_REJECT
+              : NodeFilter.FILTER_SKIP
+            : NodeFilter.FILTER_ACCEPT,
+      },
+    );
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = node as Text;
+      swap(text, () => text.nodeValue ?? '', (value) => { text.nodeValue = value; });
+    }
+
+    // Labels read by assistive technology follow the visible script too.
+    for (const el of document.querySelectorAll('[aria-label]:not([data-no-convert])')) {
+      swap(el, () => el.getAttribute('aria-label') ?? '', (value) => el.setAttribute('aria-label', value));
+    }
+  });
+
   // The tint ramp is not linear in metres, so build the legend from the same
   // function the terrain uses and put the sea-level tick where it actually falls.
   const { rampCss, seaLevelStop } = useMemo(() => {
@@ -180,6 +240,18 @@ export default function Home() {
           <a href="#map">探索地图</a>
           <a href="#guide">阅读指南</a>
           <a className="about-button" href="#sources">资料来源</a>
+          <button
+            className="script-toggle"
+            data-no-convert
+            onClick={() => {
+              const next = script === 'hans' ? 'hant' : 'hans';
+              setScript(next);
+              localStorage.setItem('script', next);
+            }}
+            aria-label={script === 'hans' ? '切换为繁体字' : '切換為簡體字'}
+          >
+            <span>简</span><i /><span>繁</span>
+          </button>
         </nav>
       </header>
 

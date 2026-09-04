@@ -81,6 +81,37 @@ Labels declutter greedily: dots always draw, names drop out when they would
 collide with one already placed. Gospel sites outrank towns, the selected site
 outranks everything, and a hidden label reappears on hover.
 
+### Simplified and Traditional Chinese
+
+The header carries a 简 / 繁 toggle; the choice persists in `localStorage`.
+
+Every visible string is authored in Simplified Chinese, and the canvas draws no
+text, so the conversion runs over DOM text nodes after each render instead of
+threading a translation call through every component. Elements marked
+`data-no-convert` are skipped — the toggle itself has to keep showing 简 and 繁
+in their own scripts. `aria-label` attributes and `<html lang>` follow the
+visible script.
+
+Shipping OpenCC to the browser would add roughly 6 MB of dictionaries for a
+script toggle, so `scripts/build-zh-hant.mjs` runs OpenCC at build time and
+emits `app/zh-hant.ts` — a table covering this site's vocabulary and nothing
+else. It currently holds 233 characters and 10 phrases, and costs about 2.5 kB
+gzipped.
+
+The generator is careful about two things. Ambiguous characters (里 → 里 or 裡,
+干 → 干 or 幹) take whichever reading this site's own text uses most, so the
+phrase table only carries the minority cases. And phrase values always come from
+converting the *whole* run, never a fragment — OpenCC reads `沿海干` out of
+context as 沿海乾 and would otherwise poison the table. The script then asserts
+that the emitted table reproduces OpenCC exactly across all 471 runs of Chinese
+in the source, so a bad entry fails the build rather than the page.
+
+Regenerate after changing any Chinese text:
+
+```bash
+npm run build:zh
+```
+
 ---
 
 ## Project layout
@@ -93,15 +124,17 @@ app/
   page.tsx      the interface
   globals.css   styles
   layout.tsx    metadata for the vinext build
+  zh-hant.ts    generated — Simplified→Traditional table for this vocabulary
 scripts/
-  verify-map-data.mjs   self-check for the generated data
+  verify-map-data.mjs   self-check for the generated map data
+  build-zh-hant.mjs     regenerates app/zh-hant.ts via OpenCC
 src/entry.tsx           mount point for the static build
 index.html              document shell for the static build
 vite.static.config.ts   static build config (GitHub Pages)
 vite.config.ts          vinext + Cloudflare config (untouched)
 ```
 
-`app/geo.ts` is generated and should not be hand-edited.
+`app/geo.ts` and `app/zh-hant.ts` are generated and should not be hand-edited.
 
 ---
 
@@ -113,6 +146,7 @@ Requires Node ≥ 22.13.
 npm install
 npm run dev              # vinext dev server on :3000
 npm run verify           # check the generated map data
+npm run build:zh         # regenerate the Traditional Chinese table
 npm run lint
 ```
 
@@ -131,8 +165,8 @@ if you fork the repository under a different name.
 ### Deployment
 
 `.github/workflows/pages.yml` runs on every push to `main`: install, verify the
-map data, build the static bundle, deploy to GitHub Pages. A failing data check
-blocks the deploy.
+map data, confirm the Traditional Chinese table is current, build the static
+bundle, deploy to GitHub Pages. A failing check blocks the deploy.
 
 ---
 
@@ -202,6 +236,8 @@ Two licences, because this repository holds two kinds of work.
 - **Map content** — CC BY 4.0. See [`LICENSE-CONTENT`](LICENSE-CONTENT). This
   covers the place descriptions in `app/places.ts`, the regional boundary
   polygons, and the written sections of this README.
+
+[OpenCC](https://github.com/BYVoid/OpenCC), used at build time only, is Apache 2.0.
 
 The underlying geodata carries no conditions: Natural Earth is public domain and
 SRTM is released by NASA into the public domain. Attribution to both is
