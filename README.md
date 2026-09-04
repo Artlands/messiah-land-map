@@ -194,8 +194,10 @@ npm run preview:static
 ```
 
 The static build bundles the same client component as a plain SPA. Its base path
-is `/Messiah-Land-Map/`; override it with the `PAGES_BASE` environment variable
-if you fork the repository under a different name.
+must match the path GitHub Pages serves it from: the workflow passes the
+repository name as `PAGES_BASE`, and the config falls back to
+`/messiah-land-map/` for a local build. Set `PAGES_BASE` yourself if you serve
+it from anywhere else — a mismatch 404s the bundle and renders a blank page.
 
 ### Deployment
 

@@ -5,7 +5,9 @@ import { defineConfig } from 'vite';
 // Static build for GitHub Pages. The vinext/Cloudflare setup in vite.config.ts
 // is untouched — this config only bundles the same app as a plain SPA.
 export default defineConfig({
-  base: process.env.PAGES_BASE ?? '/Messiah-Land-Map/',
+  // The workflow passes the repository name, so renaming the repo cannot leave
+  // the deployed page pointing at assets that are no longer there.
+  base: process.env.PAGES_BASE ?? '/messiah-land-map/',
   css: { postcss: { plugins: [tailwindcss()] } },
   plugins: [react()],
   build: {
