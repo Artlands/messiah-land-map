@@ -5,10 +5,11 @@ data rather than decorative terrain. Rotate the land, tilt the horizon, and read
 the Gospel narratives against the distances and height differences they actually
 happened in.
 
-**Live:** https://lijie.me/Messiah-Land-Map/ (also at
-https://artlands.github.io/Messiah-Land-Map/)
+**Live:** https://lijie.me/messiah-land-map/ (also at
+https://artlands.github.io/messiah-land-map/)
 
-The interface is in Simplified Chinese; this document is the technical reference.
+The interface reads in Simplified Chinese, Traditional Chinese or English;
+this document is the technical reference.
 
 ---
 
@@ -61,9 +62,13 @@ exists for them — but the place coordinates underneath are measured.
 The map is a heightfield painted to a 2D canvas; there is no WebGL and no 3D
 library. `app/terrain.ts` holds the whole renderer:
 
-- **Projection** — rotation about the vertical axis plus a tilt, orthographic.
-  `makeFrame()` projects the frame corners first and scales to fit, so nothing
-  clips at any rotation or tilt.
+- **Projection** — rotation about the vertical axis plus a tilt. Axonometric by
+  default; the ⏢ button in the view tools switches to a one-point perspective,
+  where each point is scaled by `EYE / (EYE - z)` and `z` is how far it stands
+  towards the camera. `EYE = 2.4` frame units, which puts the near edge about
+  1.4× the far edge — lower it for a wider, heavier cone.
+  `makeFrame()` projects the frame corners through the same transform and scales
+  to fit, so nothing clips at any rotation, tilt or projection.
 - **Shading** — hypsometric tint (the palette convention of printed relief
   atlases) multiplied by hillshade computed from the true surface gradient in
   metres, with a distance haze so depth reads without a fog overlay.
@@ -81,16 +86,20 @@ Labels declutter greedily: dots always draw, names drop out when they would
 collide with one already placed. Gospel sites outrank towns, the selected site
 outranks everything, and a hidden label reappears on hover.
 
-### Simplified and Traditional Chinese
+### Language toggle
 
-The header carries a 简 / 繁 toggle; the choice persists in `localStorage`.
+The header carries a 简 / 繁 / EN toggle; the choice persists in `localStorage`.
 
 Every visible string is authored in Simplified Chinese, and the canvas draws no
-text, so the conversion runs over DOM text nodes after each render instead of
-threading a translation call through every component. Elements marked
-`data-no-convert` are skipped — the toggle itself has to keep showing 简 and 繁
-in their own scripts. `aria-label` attributes and `<html lang>` follow the
-visible script.
+text, so the switch runs over DOM text nodes after each render instead of
+threading a translation call through every component. Traditional is a script
+conversion of that source, English a lookup in `app/en.json`; both start from
+the Simplified text, so going 繁 → EN is not a double translation. Elements
+marked `data-no-convert` are skipped — the toggle itself has to keep showing 简
+and 繁 in their own scripts. `aria-label` attributes and `<html lang>` follow
+the visible language.
+
+#### Traditional
 
 Shipping OpenCC to the browser would add roughly 6 MB of dictionaries for a
 script toggle, so `scripts/build-zh-hant.mjs` runs OpenCC at build time and
@@ -112,6 +121,28 @@ Regenerate after changing any Chinese text:
 npm run build:zh
 ```
 
+#### English
+
+`app/en.json` maps each Simplified string to its English form — 299 entries
+covering the gazetteer, the region and water labels, the interface chrome and
+every `aria-label`. Keys are the source text with whitespace collapsed, which is
+how a DOM text node is looked up at runtime; surrounding whitespace is put back,
+since a JSX text node often carries the space separating it from the next
+element. A string with no entry falls through to Chinese rather than vanishing.
+
+`scripts/check-en.mjs` extracts every user-visible Chinese string from
+`page.tsx`, `places.ts` and `geo.ts` and reports what the table is missing or no
+longer needs. Add English whenever you add Chinese:
+
+```bash
+npm run check:en                    # report gaps
+node scripts/check-en.mjs --keys    # print the keys, ready to fill in
+```
+
+Because English words are wider than the Chinese they replace, the map's label
+declutter measures the English name when English is active — otherwise most
+labels would collide and drop out.
+
 ---
 
 ## Project layout
@@ -125,9 +156,12 @@ app/
   globals.css   styles
   layout.tsx    metadata for the vinext build
   zh-hant.ts    generated — Simplified→Traditional table for this vocabulary
+  en.ts         English lookup over app/en.json
+  en.json       Simplified→English table for every visible string
 scripts/
   verify-map-data.mjs   self-check for the generated map data
   build-zh-hant.mjs     regenerates app/zh-hant.ts via OpenCC
+  check-en.mjs          checks app/en.json covers every visible Chinese string
 src/entry.tsx           mount point for the static build
 index.html              document shell for the static build
 vite.static.config.ts   static build config (GitHub Pages)
@@ -147,6 +181,7 @@ npm install
 npm run dev              # vinext dev server on :3000
 npm run verify           # check the generated map data
 npm run build:zh         # regenerate the Traditional Chinese table
+npm run check:en         # check the English table is complete
 npm run lint
 ```
 
@@ -165,8 +200,9 @@ if you fork the repository under a different name.
 ### Deployment
 
 `.github/workflows/pages.yml` runs on every push to `main`: install, verify the
-map data, confirm the Traditional Chinese table is current, build the static
-bundle, deploy to GitHub Pages. A failing check blocks the deploy.
+map data, confirm the Traditional Chinese table is current and the English table
+complete, build the static bundle, deploy to GitHub Pages. A failing check
+blocks the deploy.
 
 ---
 
@@ -234,8 +270,9 @@ Two licences, because this repository holds two kinds of work.
 
 - **Code** — MIT. See [`LICENSE`](LICENSE).
 - **Map content** — CC BY 4.0. See [`LICENSE-CONTENT`](LICENSE-CONTENT). This
-  covers the place descriptions in `app/places.ts`, the regional boundary
-  polygons, and the written sections of this README.
+  covers the place descriptions in `app/places.ts` and their English translations
+  in `app/en.json`, the regional boundary polygons, and the written sections of
+  this README.
 
 [OpenCC](https://github.com/BYVoid/OpenCC), used at build time only, is Apache 2.0.
 

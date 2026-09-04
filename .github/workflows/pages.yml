@@ -30,6 +30,8 @@ jobs:
         run: |
           npm run build:zh
           git diff --exit-code app/zh-hant.ts
+      - name: Check every Chinese string has an English form
+        run: npm run check:en
       - run: npm run build:static
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

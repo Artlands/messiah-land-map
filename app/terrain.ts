@@ -87,7 +87,7 @@ export function shoreLon(lat: number) {
 
 // ---------------------------------------------------------------- geometry
 
-export type View = { rotation: number; tilt: number; zoom: number };
+export type View = { rotation: number; tilt: number; zoom: number; perspective: boolean };
 export type Frame = { cx: number; cy: number; scale: number; view: View };
 
 export type Projected = { x: number; y: number; depth: number };
@@ -100,11 +100,31 @@ function rotate(u: number, v: number, view: View) {
   return { rx: px * cos - pz * sin, rz: px * sin + pz * cos };
 }
 
+/**
+ * Eye distance for the perspective projection, in frame units — the frame is
+ * ASPECT × 1, and the nearest point of it reaches about 0.6 at full tilt. Lower
+ * means a wider cone and a heavier foreshortening. Tune here, nowhere else.
+ */
+const EYE = 2.4;
+
+/**
+ * Foreshortening at a point, 1 for the axonometric view. `rz * cos(tilt) +
+ * h * sin(tilt)` is how far the point stands towards the camera along its
+ * viewing axis, so near ground and high summits both grow.
+ */
+function foreshorten(rz: number, h: number, view: View) {
+  if (!view.perspective) return 1;
+  return EYE / (EYE - (rz * Math.cos(view.tilt) + h * Math.sin(view.tilt)));
+}
+
 export function project(u: number, v: number, h: number, f: Frame): Projected {
   const { rx, rz } = rotate(u, v, f.view);
+  const k = foreshorten(rz, h, f.view) * f.scale;
   return {
-    x: f.cx + rx * f.scale,
-    y: f.cy + rz * f.scale * Math.sin(f.view.tilt) - h * f.scale * Math.cos(f.view.tilt),
+    x: f.cx + rx * k,
+    y: f.cy + (rz * Math.sin(f.view.tilt) - h * Math.cos(f.view.tilt)) * k,
+    // Painter's order and haze both read the unforeshortened depth, which is
+    // the same ordering either way.
     depth: rz,
   };
 }
@@ -121,9 +141,11 @@ export function makeFrame(view: View, width: number, height: number): Frame {
     for (const v of [0, 1]) {
       for (const h of [lo, hi]) {
         const { rx, rz } = rotate(u, v, view);
-        const y = rz * Math.sin(view.tilt) - h * Math.cos(view.tilt);
-        if (rx < minX) minX = rx;
-        if (rx > maxX) maxX = rx;
+        const k = foreshorten(rz, h, view);
+        const x = rx * k;
+        const y = (rz * Math.sin(view.tilt) - h * Math.cos(view.tilt)) * k;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
         if (y < minY) minY = y;
         if (y > maxY) maxY = y;
       }

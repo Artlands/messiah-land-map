@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { places, themes, type Place, type ThemeFilter } from './places';
 import { regionLabels, regions, peaks, lakes } from './geo';
 import { toTraditional } from './zh-hant';
+import { toEnglish } from './en';
 import {
   drawScene, elevationAt, elevationRange, hypsometric, makeFrame, normLat, normLon,
   project, regionAt, relief, RULER_TINT, type Frame, type View,
@@ -18,9 +19,16 @@ const RULERS: { key: keyof typeof RULER_TINT; name: string; note: string }[] = [
   { key: 'syria', name: '叙利亚行省', note: '腓尼基 · 以土利亚' },
 ];
 
+type Lang = 'hans' | 'hant' | 'en';
+const LANGS: [Lang, string][] = [['hans', '简'], ['hant', '繁'], ['en', 'EN']];
+const CONVERT: Record<Lang, ((s: string) => string) | null> = {
+  hans: null, hant: toTraditional, en: toEnglish,
+};
+const HTML_LANG: Record<Lang, string> = { hans: 'zh-CN', hant: 'zh-Hant', en: 'en' };
+
 const rgb = (c: [number, number, number]) => `rgb(${c[0]},${c[1]},${c[2]})`;
 
-const DEFAULT_VIEW: View = { rotation: -0.1, tilt: 0.62, zoom: 1 };
+const DEFAULT_VIEW: View = { rotation: -0.1, tilt: 0.62, zoom: 1, perspective: false };
 
 function useSize<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -83,9 +91,10 @@ export default function Home() {
   const [showRegions, setShowRegions] = useState(true);
   const [showTowns, setShowTowns] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
-  const [script, setScript] = useState<'hans' | 'hant'>(() =>
-    typeof window !== 'undefined' && localStorage.getItem('script') === 'hant' ? 'hant' : 'hans',
-  );
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = typeof window !== 'undefined' && localStorage.getItem('script');
+    return saved === 'hant' || saved === 'en' ? saved : 'hans';
+  });
   const { ref: mapRef, size } = useSize<HTMLDivElement>();
   const dragRef = useRef<{ x: number; y: number; rotation: number; tilt: number } | null>(null);
 
@@ -120,7 +129,9 @@ export default function Home() {
           x: q.x,
           y: q.y,
           z: Math.round((q.depth + 1) * 200),
-          w: p.name.length * (wide ? 15 : 12) + 34,
+          w: (lang === 'en'
+            ? toEnglish(p.name).length * (wide ? 7.5 : 5.5)
+            : p.name.length * (wide ? 15 : 12)) + 34,
           h: wide ? 36 : 24,
           label: true,
         };
@@ -136,7 +147,7 @@ export default function Home() {
       }
     }
     return laid;
-  }, [visible, frame, activeId]);
+  }, [visible, frame, activeId, lang]);
 
   const anchor = useCallback((lon: number, lat: number, lift: number) => {
     const p = project(normLon(lon), normLat(lat), relief(elevationAt(lon, lat)) + lift, frame);
@@ -155,11 +166,13 @@ export default function Home() {
   };
 
   /**
-   * Simplified ⇄ traditional. Every visible string is authored in simplified
-   * Chinese and lives in the DOM (the canvas draws no text), so the conversion
-   * runs over text nodes after each render rather than threading a translation
-   * call through every component. Anything inside [data-no-convert] is left
-   * alone — the toggle has to keep showing 简 and 繁 in their own scripts.
+   * Language switch. Every visible string is authored in simplified Chinese and
+   * lives in the DOM (the canvas draws no text), so the swap runs over text
+   * nodes after each render rather than threading a translation call through
+   * every component. Traditional is a script conversion, English a lookup in
+   * app/en.json; both take the simplified text as their source. Anything inside
+   * [data-no-convert] is left alone — the toggle has to keep showing 简 and 繁
+   * in their own scripts.
    *
    * `rendered` is what we last wrote. If a node no longer matches it, React has
    * replaced the text and the new value becomes the source.
@@ -167,18 +180,18 @@ export default function Home() {
   const written = useRef(new WeakMap<Node, { source: string; rendered: string }>());
   const converted = useRef(false);
   useEffect(() => {
-    if (script === 'hans' && !converted.current) return;
-    converted.current = script === 'hant';
-    document.documentElement.dataset.script = script;
-    document.documentElement.lang = script === 'hant' ? 'zh-Hant' : 'zh-CN';
+    const convert = CONVERT[lang];
+    if (!convert && !converted.current) return;
+    converted.current = convert !== null;
+    document.documentElement.lang = HTML_LANG[lang];
 
     const store = written.current;
     const swap = (node: Node, read: () => string, write: (value: string) => void) => {
       const record = store.get(node);
       const current = read();
       const source = record && current === record.rendered ? record.source : current;
-      if (script === 'hant') {
-        const rendered = toTraditional(source);
+      if (convert) {
+        const rendered = convert(source);
         if (current !== rendered) write(rendered);
         store.set(node, { source, rendered });
       } else if (record) {
@@ -240,18 +253,18 @@ export default function Home() {
           <a href="#map">探索地图</a>
           <a href="#guide">阅读指南</a>
           <a className="about-button" href="#sources">资料来源</a>
-          <button
-            className="script-toggle"
-            data-no-convert
-            onClick={() => {
-              const next = script === 'hans' ? 'hant' : 'hans';
-              setScript(next);
-              localStorage.setItem('script', next);
-            }}
-            aria-label={script === 'hans' ? '切换为繁体字' : '切換為簡體字'}
-          >
-            <span>简</span><i /><span>繁</span>
-          </button>
+          <div className="script-toggle" data-no-convert role="group" aria-label="语言 / Language">
+            {LANGS.map(([code, label]) => (
+              <button
+                key={code}
+                className={lang === code ? 'on' : ''}
+                aria-pressed={lang === code}
+                onClick={() => { setLang(code); localStorage.setItem('script', code); }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </nav>
       </header>
 
@@ -322,7 +335,7 @@ export default function Home() {
               className={`map-marker kind-${place.kind} ${activeId === place.id ? 'active' : ''} ${label ? '' : 'no-label'}`}
               style={{ left: x, top: y, zIndex: z }}
               onClick={() => selectPlace(place)}
-              aria-label={`查看${place.name}`}
+              aria-label={place.name}
             >
               <span className="marker-dot"><i /></span>
               <span className="marker-label"><b>{place.name}</b><small>{place.greek}</small></span>
@@ -360,7 +373,8 @@ export default function Home() {
           <div className="view-tools" aria-label="地图视图控制">
             <button onClick={() => setView((v) => ({ ...v, zoom: Math.min(3.2, v.zoom * 1.18) }))} aria-label="放大">＋</button>
             <button onClick={() => setView((v) => ({ ...v, zoom: Math.max(0.7, v.zoom / 1.18) }))} aria-label="缩小">−</button>
-            <button onClick={() => setView(DEFAULT_VIEW)} aria-label="重置视图">⌂</button>
+            <button onClick={() => setView((v) => ({ ...DEFAULT_VIEW, perspective: v.perspective }))} aria-label="重置视图">⌂</button>
+            <button className={view.perspective ? 'on' : ''} onClick={() => setView((v) => ({ ...v, perspective: !v.perspective }))} aria-label="切换透视投影">⏢</button>
             <button className={showRegions ? 'on' : ''} onClick={() => setShowRegions((s) => !s)} aria-label="切换分封疆界">▧</button>
             <button className={showTowns ? 'on' : ''} onClick={() => setShowTowns((s) => !s)} aria-label="切换城邑标注">◦</button>
           </div>
