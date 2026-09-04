@@ -4,7 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://messiah-land-map.sturdy-pike-6678.chatgpt.site'),
   title: '弥赛亚之地｜耶稣时代以色列 3D 互动地图',
-  description: '探索公元一世纪的加利利、撒马利亚与犹太地，在立体地形中重走福音书中的地点与事件。',
+  description: '探索公元一世纪从腓尼基到犹太、从地中海到低加波利的立体地形，在真实高差中重走福音书地点。',
   openGraph: {
     title: '弥赛亚之地｜耶稣时代以色列 3D 互动地图',
     description: '转动地形，沿着福音书的记载，重新理解故事发生的距离与地貌。',
