@@ -196,9 +196,13 @@ silently.
 
 ## Licence
 
-No licence has been chosen for the code yet, so default copyright applies — add
-a `LICENSE` file if you want others to reuse it.
+Two licences, because this repository holds two kinds of work.
 
-The underlying data is freely usable: Natural Earth is public domain, and SRTM
-is released by NASA into the public domain. The place descriptions are original
-text written for this project.
+- **Code** — MIT. See [`LICENSE`](LICENSE).
+- **Map content** — CC BY 4.0. See [`LICENSE-CONTENT`](LICENSE-CONTENT). This
+  covers the place descriptions in `app/places.ts`, the regional boundary
+  polygons, and the written sections of this README.
+
+The underlying geodata carries no conditions: Natural Earth is public domain and
+SRTM is released by NASA into the public domain. Attribution to both is
+customary, and this project gives it here and in the interface.
