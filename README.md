@@ -145,7 +145,7 @@ npm run verify
 `scripts/verify-map-data.mjs` decodes the DEM out of `app/geo.ts` and asserts:
 
 1. the grid length matches the declared dimensions;
-2. seven landmarks fall inside published survey ranges — Jerusalem, the Sea of
+2. eight landmarks fall inside published survey ranges — Jerusalem, the Sea of
    Galilee and Dead Sea surfaces, Hermon, Jericho, the Hebron ridge, the Jezreel
    valley floor, and open sea off Ashdod (which catches a transposed axis);
 3. every gazetteer entry sits inside the frame, and its stated elevation agrees
@@ -196,5 +196,9 @@ silently.
 
 ## Licence
 
-Code: MIT. Natural Earth is public domain; SRTM is public domain (NASA). The
-written place descriptions are original text for this project.
+No licence has been chosen for the code yet, so default copyright applies — add
+a `LICENSE` file if you want others to reuse it.
+
+The underlying data is freely usable: Natural Earth is public domain, and SRTM
+is released by NASA into the public domain. The place descriptions are original
+text written for this project.
