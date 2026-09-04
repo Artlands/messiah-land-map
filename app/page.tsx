@@ -28,6 +28,13 @@ const HTML_LANG: Record<Lang, string> = { hans: 'zh-CN', hant: 'zh-Hant', en: 'e
 
 const rgb = (c: [number, number, number]) => `rgb(${c[0]},${c[1]},${c[2]})`;
 
+/**
+ * Where to write the Mediterranean. It is drawn as flat bands rather than a
+ * lake ring, so unlike the lakes it has no polygon to take a centroid from —
+ * this is open water off the Carmel coast, the widest reach of sea in frame.
+ */
+const SEA_LABEL = { lon: 34.56, lat: 32.7 };
+
 const DEFAULT_VIEW: View = { rotation: -0.1, tilt: 0.62, zoom: 1, perspective: false };
 
 function useSize<T extends HTMLElement>() {
@@ -148,6 +155,8 @@ export default function Home() {
     }
     return laid;
   }, [visible, frame, activeId, lang]);
+
+  const seaLabel = project(normLon(SEA_LABEL.lon), normLat(SEA_LABEL.lat), 0.004, frame);
 
   const anchor = useCallback((lon: number, lat: number, lift: number) => {
     const p = project(normLon(lon), normLat(lat), relief(elevationAt(lon, lat)) + lift, frame);
@@ -322,6 +331,10 @@ export default function Home() {
               </div>
             );
           })}
+
+          <div className="water-label" style={{ left: seaLabel.x, top: seaLabel.y }}>
+            <b>地中海</b>
+          </div>
 
           {peaks.filter((pk) => !places.some((p) => p.name === pk.name)).map((pk) => (
             <div className="peak-label" key={pk.name} style={anchor(pk.lon, pk.lat, 0.006)}>
