@@ -218,3 +218,60 @@ footer a { justify-self: end; }
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* ---- added with the accurate-terrain rebuild ---- */
+.water-label {
+  position: absolute; transform: translate(-50%, -50%); pointer-events: none; text-align: center;
+  color: #8fd2da; text-shadow: 0 1px 5px rgba(0,0,0,.8);
+}
+.water-label b { display: block; font: 400 13px/1 Georgia, "Songti SC", serif; letter-spacing: .3em; }
+.water-label span { display: block; margin-top: 4px; font-size: 8px; letter-spacing: .16em; opacity: .65; }
+
+.peak-label {
+  position: absolute; transform: translate(-50%, -100%); pointer-events: none; white-space: nowrap;
+  display: flex; align-items: baseline; gap: 5px; text-shadow: 0 1px 5px rgba(0,0,0,.85);
+}
+.peak-label i { color: #efe6d2; font-style: normal; font-size: 8px; }
+.peak-label b { color: #ded5c0; font: 400 10px Georgia, "Songti SC", serif; letter-spacing: .1em; }
+.peak-label span { color: #9aa39b; font-size: 8px; letter-spacing: .08em; }
+
+.map-marker.kind-town .marker-dot i { background: #79b6d8; box-shadow: 0 0 8px rgba(121,182,216,.7); }
+.map-marker.kind-decapolis .marker-dot i { background: #8fd0a6; box-shadow: 0 0 8px rgba(143,208,166,.7); }
+.map-marker.kind-town .marker-label b,
+.map-marker.kind-decapolis .marker-label b { font-size: 10px; opacity: .82; }
+.map-marker.kind-town .marker-label small,
+.map-marker.kind-decapolis .marker-label small { display: none; }
+
+.legend-ramp { width: 100%; height: 8px; }
+.legend-ticks { position: relative; height: 12px; margin-top: 5px; color: #8c958e; font: 7px Georgia, serif; }
+.legend-ticks b { font-weight: 400; }
+.legend-ticks b:first-child { position: absolute; left: 0; }
+.legend-ticks b:last-child { position: absolute; right: 0; }
+.legend-zero { position: relative; height: 11px; }
+.legend-zero b { position: absolute; bottom: 0; transform: translateX(-50%); color: #cbbf9d; font: 400 7px Georgia, "Songti SC", serif; letter-spacing: .1em; white-space: nowrap; }
+.legend-zero b::after { content: ''; position: absolute; left: 50%; bottom: -4px; width: 1px; height: 4px; background: rgba(203,191,157,.75); }
+
+.ruler-legend {
+  position: absolute; left: clamp(24px, 5vw, 76px); top: 232px; z-index: 12;
+  width: 186px; padding: 15px 16px; background: rgba(6, 16, 19, .78);
+  border: 1px solid var(--line); backdrop-filter: blur(7px);
+}
+.ruler-legend h4 { margin: 0 0 11px; color: var(--gold); font: 400 9px/1 Arial, sans-serif; letter-spacing: .2em; }
+.ruler-legend div { display: grid; grid-template-columns: 9px 1fr; gap: 8px; align-items: baseline; padding: 4px 0; opacity: .62; transition: opacity .2s; }
+.ruler-legend div.on { opacity: 1; }
+.ruler-legend i { grid-column: 1; grid-row: 1 / span 2; width: 9px; height: 9px; margin-top: 3px; border-radius: 2px; }
+.ruler-legend b, .ruler-legend span { grid-column: 2; }
+.ruler-legend b { display: block; color: #d6cfbe; font: 400 10px Arial, "PingFang SC", sans-serif; letter-spacing: .07em; }
+.ruler-legend span { display: block; margin-top: 2px; color: #77817c; font-size: 8px; letter-spacing: .06em; }
+
+.modern-site { margin-top: 6px; color: #7d877f; font-size: 9px; letter-spacing: .1em; }
+.view-tools button.on { border-color: var(--gold); color: var(--gold-bright); }
+
+@media (max-width: 900px) {
+  .ruler-legend { display: none; }
+  .peak-label span { display: none; }
+}
+.map-marker.no-label .marker-label { display: none; }
+.map-marker.no-label:hover .marker-label,
+.map-marker.no-label:focus-visible .marker-label { display: block; }
+.map-marker.no-label:hover, .map-marker.no-label:focus-visible { z-index: 500 !important; }

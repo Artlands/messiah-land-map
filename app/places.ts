@@ -1,0 +1,227 @@
+// First-century gazetteer. Coordinates are the modern WGS-84 positions of the
+// identified (or most widely accepted candidate) sites; elevations are metres
+// above/below mean sea level.
+
+export type Kind = 'gospel' | 'town' | 'decapolis';
+export type Theme = '生平' | '教导' | '神迹' | '受难周' | '背景';
+
+export type Place = {
+  id: string;
+  name: string;      // 中文
+  greek: string;     // 一世纪名称
+  site?: string;     // 今址
+  lon: number;
+  lat: number;
+  elev: number;
+  region: string;
+  kind: Kind;
+  theme: Theme;
+  date?: string;
+  title?: string;
+  description?: string;
+  reference?: string;
+};
+
+export const places: Place[] = [
+  // ——— 加利利 ———
+  { id: 'nazareth', name: '拿撒勒', greek: 'ΝΑΖΑΡΕΤ', site: 'Nazareth', lon: 35.3035, lat: 32.6996, elev: 347,
+    region: '加利利', kind: 'gospel', theme: '生平', date: '童年至公开传道之前', title: '成长之城',
+    description: '山脊上的小村，一世纪估计仅数百人。耶稣在此长大，后来在会堂宣读以赛亚书，却被乡人拒绝。距行政大城西弗里斯仅约 6 公里。',
+    reference: '路加福音 2:39–52；4:16–30' },
+  { id: 'sepphoris', name: '西弗里斯', greek: 'ΣΕΠΦΩΡΙΣ', site: 'Tzipori', lon: 35.2795, lat: 32.7527, elev: 289,
+    region: '加利利', kind: 'town', theme: '背景',
+    description: '希律安提帕早期的加利利首府，福音书未提及，却是拿撒勒最近的城市。' },
+  { id: 'cana', name: '迦拿', greek: 'ΚΑΝΑ', site: 'Kafr Kanna（另说 Khirbet Qana）', lon: 35.3418, lat: 32.7466, elev: 218,
+    region: '加利利', kind: 'gospel', theme: '神迹', date: '公开传道初期', title: '水变为酒',
+    description: '约翰福音记载的第一个「记号」。今址有两处候选：Kafr Kanna（传统）与北方的 Khirbet Qana（考古学者多倾向）。',
+    reference: '约翰福音 2:1–11；4:46–54' },
+  { id: 'capernaum', name: '迦百农', greek: 'ΚΑΦΑΡΝΑΟΥΜ', site: 'Tell Hum', lon: 35.5751, lat: 32.8808, elev: -200,
+    region: '加利利', kind: 'gospel', theme: '教导', date: '加利利事工中心', title: '他自己的城',
+    description: '湖西北岸的渔村与关税站，位于通往大马士革的干道旁。马太福音称之为耶稣「自己的城」，加利利事工多以此为基地。',
+    reference: '马太福音 4:13；马可福音 1:21–34；2:1–12' },
+  { id: 'chorazin', name: '哥拉汛', greek: 'ΧΟΡΑΖΙΝ', site: 'Korazim', lon: 35.5640, lat: 32.9105, elev: 260,
+    region: '加利利', kind: 'gospel', theme: '教导', date: '加利利事工期间', title: '受责备的城',
+    description: '迦百农以北的黑玄武岩村落。与伯赛大、迦百农同被列入「有祸了」的责备。',
+    reference: '马太福音 11:20–24' },
+  { id: 'magdala', name: '抹大拉', greek: 'ΜΑΓΔΑΛΑ / ΤΑΡΙΧΑΙΑΙ', site: 'Migdal', lon: 35.5170, lat: 32.8250, elev: -200,
+    region: '加利利', kind: 'gospel', theme: '生平', date: '加利利事工期间', title: '腌鱼之城',
+    description: '湖西岸的渔业与腌鱼重镇，抹大拉的马利亚由此得名。已发掘出一世纪会堂与码头。',
+    reference: '路加福音 8:2；马可福音 15:40–41' },
+  { id: 'gennesaret', name: '革尼撒勒', greek: 'ΓΕΝΝΗΣΑΡΕΤ', site: 'Ginosar 平原', lon: 35.5330, lat: 32.8450, elev: -200,
+    region: '加利利', kind: 'gospel', theme: '神迹', date: '加利利事工期间', title: '湖西的沃野',
+    description: '湖西岸约 5 公里长的肥沃冲积平原，约瑟夫盛赞其物产。耶稣渡湖后在此登岸医治众人。',
+    reference: '马可福音 6:53–56' },
+  { id: 'tiberias', name: '提比哩亚', greek: 'ΤΙΒΕΡΙΑΣ', site: 'Tiberias', lon: 35.5320, lat: 32.7920, elev: -207,
+    region: '加利利', kind: 'town', theme: '背景',
+    description: '安提帕于公元 20 年左右建成的新首府，献给提比留。福音书中耶稣从未进城。' },
+  { id: 'nain', name: '拿因', greek: 'ΝΑΪΝ', site: 'Nein', lon: 35.3450, lat: 32.6310, elev: 216,
+    region: '加利利', kind: 'gospel', theme: '神迹', date: '加利利事工期间', title: '寡妇之子复活',
+    description: '摩利冈南坡的小村，俯瞰耶斯列平原。耶稣在城门口叫寡妇的独子复活。',
+    reference: '路加福音 7:11–17' },
+  { id: 'tabor', name: '他泊山', greek: 'ΙΘΑΒΥΡΙΟΝ', site: 'Har Tavor', lon: 35.3900, lat: 32.6870, elev: 588,
+    region: '加利利', kind: 'town', theme: '背景',
+    description: '耶斯列平原东端的圆顶孤山，后世传统认为是登山变像之处（另一说为黑门山）。' },
+  { id: 'bethsaida', name: '伯赛大', greek: 'ΒΗΘΣΑΪΔΑ ΙΟΥΛΙΑΣ', site: 'et-Tell（另说 el-Araj）', lon: 35.6303, lat: 32.9105, elev: -155,
+    region: '腓力分封地', kind: 'gospel', theme: '神迹', date: '加利利事工期间', title: '门徒的家乡',
+    description: '约旦河入湖处东侧，属腓力分封地。彼得、安得烈与腓力的家乡；医治瞎子与喂饱五千的传统都与此相连。',
+    reference: '约翰福音 1:44；马可福音 8:22–26；路加福音 9:10–17' },
+
+  // ——— 加利利海东岸 / 低加波利 ———
+  { id: 'gergesa', name: '格拉森地区', greek: 'ΧΩΡΑ ΤΩΝ ΓΕΡΑΣΗΝΩΝ', site: 'Kursi（Gergesa）', lon: 35.6500, lat: 32.8250, elev: -190,
+    region: '低加波利', kind: 'gospel', theme: '神迹', date: '加利利事工期间', title: '渡到湖东',
+    description: '福音书抄本分别作格拉森、加大拉、格革森。库尔西是唯一有陡坡直入湖中的地点，符合猪群冲下山崖的描写。',
+    reference: '马可福音 5:1–20' },
+  { id: 'hippos', name: '希波斯', greek: 'ΙΠΠΟΣ / ΣΟΥΣΙΤΑ', site: 'Sussita', lon: 35.6597, lat: 32.7787, elev: 144,
+    region: '低加波利', kind: 'decapolis', theme: '背景',
+    description: '低加波利十城之一，建在俯瞰湖东岸的马鞍形山顶，高出湖面约 350 米，可能即「山上的城」的意象来源。' },
+  { id: 'gadara', name: '加大拉', greek: 'ΓΑΔΑΡΑ', site: 'Umm Qais', lon: 35.6840, lat: 32.6540, elev: 378,
+    region: '低加波利', kind: 'decapolis', theme: '背景',
+    description: '低加波利名城，以希腊哲学与诗人闻名，辖地一度延伸至加利利海岸。' },
+  { id: 'pella', name: '比拉', greek: 'ΠΕΛΛΑ', site: 'Tabaqat Fahl', lon: 35.6170, lat: 32.4500, elev: -50,
+    region: '低加波利', kind: 'decapolis', theme: '背景',
+    description: '约旦河谷东侧的低加波利城。传统记载耶路撒冷教会在公元 66 年战争前迁往此地。' },
+  { id: 'scythopolis', name: '西古提波利', greek: 'ΣΚΥΘΟΠΟΛΙΣ', site: 'Beit She’an', lon: 35.5000, lat: 32.5000, elev: -120,
+    region: '低加波利', kind: 'decapolis', theme: '背景',
+    description: '低加波利唯一位于约旦河西岸的城市，也是十城中最大的一座，扼守耶斯列河谷东口。' },
+  { id: 'gerasa', name: '基拉撒', greek: 'ΓΕΡΑΣΑ', site: 'Jerash', lon: 35.8920, lat: 32.2810, elev: 570,
+    region: '低加波利', kind: 'decapolis', theme: '背景',
+    description: '低加波利中保存最完整的希腊化城市，距加利利海约 60 公里。' },
+  { id: 'philadelphia', name: '非拉铁非', greek: 'ΦΙΛΑΔΕΛΦΕΙΑ', site: 'Amman（旧称拉巴）', lon: 35.9330, lat: 31.9500, elev: 780,
+    region: '低加波利', kind: 'decapolis', theme: '背景',
+    description: '低加波利最南的大城，旧约的亚扪人京城拉巴。' },
+
+  // ——— 黑门山与腓力分封地 ———
+  { id: 'caesarea-philippi', name: '凯撒利亚腓立比', greek: 'ΚΑΙΣΑΡΕΙΑ Η ΦΙΛΙΠΠΟΥ', site: 'Banias', lon: 35.6947, lat: 33.2482, elev: 350,
+    region: '腓力分封地', kind: 'gospel', theme: '教导', date: '加利利事工后期', title: '彼得的认信',
+    description: '黑门山南麓的泉源之地，原为潘神圣所。在这座满是异教神龛的城外，彼得宣认耶稣是基督，耶稣随即首次预告受难。',
+    reference: '马太福音 16:13–28；马可福音 8:27–9:1' },
+  { id: 'hermon', name: '黑门山', greek: 'ΑΕΡΜΩΝ', site: 'Jabal ash-Shaykh', lon: 35.8570, lat: 33.4160, elev: 2814,
+    region: '以土利亚', kind: 'town', theme: '背景',
+    description: '本图最高峰，终年积雪，是约旦河的主要水源，也是登山变像的另一候选地点。' },
+
+  // ——— 地中海沿岸 ———
+  { id: 'ptolemais', name: '多利买', greek: 'ΠΤΟΛΕΜΑΪΣ', site: 'Akko', lon: 35.0700, lat: 32.9280, elev: 10,
+    region: '腓尼基', kind: 'town', theme: '背景', description: '加利利西侧唯一的天然良港，属叙利亚行省。' },
+  { id: 'tyre', name: '推罗', greek: 'ΤΥΡΟΣ', site: 'Sour', lon: 35.1950, lat: 33.2710, elev: 10,
+    region: '腓尼基', kind: 'gospel', theme: '教导', date: '加利利事工期间', title: '外邦妇人的信心',
+    description: '腓尼基的港口城邦。耶稣退到推罗、西顿境内，一位叙利腓尼基妇人为女儿求告，成为福音向外邦延伸的记号。',
+    reference: '马可福音 7:24–30；马太福音 15:21–28' },
+  { id: 'sidon', name: '西顿', greek: 'ΣΙΔΩΝ', site: 'Saida', lon: 35.3690, lat: 33.5600, elev: 10,
+    region: '腓尼基', kind: 'town', theme: '背景', description: '推罗以北的姊妹港城，本图北界。' },
+  { id: 'zarephath', name: '撒勒法', greek: 'ΣΑΡΕΠΤΑ', site: 'Sarafand', lon: 35.2900, lat: 33.4600, elev: 20,
+    region: '腓尼基', kind: 'town', theme: '背景', description: '以利亚与寡妇的故事发生地，耶稣在拿撒勒讲道时引用。' },
+  { id: 'dor', name: '多珥', greek: 'ΔΩΡΑ', site: 'Tel Dor', lon: 34.9170, lat: 32.6170, elev: 5,
+    region: '沿海平原', kind: 'town', theme: '背景', description: '迦密山南麓的古港。' },
+  { id: 'caesarea', name: '凯撒利亚', greek: 'ΚΑΙΣΑΡΕΙΑ Η ΠΑΡΑΛΙΟΣ', site: 'Caesarea Maritima', lon: 34.8920, lat: 32.5000, elev: 5,
+    region: '沿海平原', kind: 'town', theme: '背景',
+    description: '希律大帝耗时十二年建成的人工深水港，罗马犹太行省的行政首府；本丢彼拉多常驻于此，其名字的石刻铭文即在此出土。' },
+  { id: 'joppa', name: '约帕', greek: 'ΙΟΠΠΗ', site: 'Jaffa', lon: 34.7550, lat: 32.0530, elev: 25,
+    region: '犹太', kind: 'town', theme: '背景', description: '犹太地传统的出海口。' },
+  { id: 'azotus', name: '亚锁都', greek: 'ΑΖΩΤΟΣ', site: 'Ashdod', lon: 34.6500, lat: 31.7500, elev: 40,
+    region: '沿海平原', kind: 'town', theme: '背景', description: '旧约非利士五城之一。' },
+  { id: 'ascalon', name: '亚实基伦', greek: 'ΑΣΚΑΛΩΝ', site: 'Ashkelon', lon: 34.5510, lat: 31.6650, elev: 15,
+    region: '沿海平原', kind: 'town', theme: '背景', description: '自治的希腊化港城，希律大帝的家族与此地有关。' },
+  { id: 'gaza', name: '迦萨', greek: 'ΓΑΖΑ', site: 'Gaza', lon: 34.4650, lat: 31.5200, elev: 45,
+    region: '沿海平原', kind: 'town', theme: '背景', description: '通往埃及与阿拉伯商道的门户。' },
+
+  // ——— 撒马利亚 ———
+  { id: 'sychar', name: '叙加', greek: 'ΣΥΧΑΡ', site: "'Askar / Balata", lon: 35.2860, lat: 32.2130, elev: 520,
+    region: '撒马利亚', kind: 'gospel', theme: '教导', date: '往返加利利途中', title: '井旁谈道',
+    description: '基利心山与以巴路山之间的隘口，雅各井在此。耶稣与撒马利亚妇人谈论「活水」与敬拜的地点之争。',
+    reference: '约翰福音 4:4–42' },
+  { id: 'shechem', name: '示剑', greek: 'ΣΥΧΕΜ', site: 'Tell Balata', lon: 35.2810, lat: 32.2140, elev: 520,
+    region: '撒马利亚', kind: 'town', theme: '背景', description: '族长时代的古城，撒马利亚人圣山基利心山脚下。' },
+  { id: 'gerizim', name: '基利心山', greek: 'ΓΑΡΙΖΙΝ', site: 'Har Gerizim', lon: 35.2730, lat: 32.2000, elev: 881,
+    region: '撒马利亚', kind: 'town', theme: '背景', description: '撒马利亚人的圣山，「我们的祖宗在这山上礼拜」。' },
+  { id: 'samaria-city', name: '撒马利亚（西巴斯特）', greek: 'ΣΕΒΑΣΤΗ', site: 'Sebastia', lon: 35.1920, lat: 32.2800, elev: 430,
+    region: '撒马利亚', kind: 'town', theme: '背景', description: '希律大帝重建并献给奥古斯都的城，故改称西巴斯特。' },
+  { id: 'aenon', name: '哀嫩', greek: 'ΑΙΝΩΝ', site: '撒冷附近（位置存疑）', lon: 35.4400, lat: 32.3350, elev: 100,
+    region: '撒马利亚', kind: 'gospel', theme: '生平', date: '施洗约翰事工期间', title: '因为那里水多',
+    description: '约翰福音记载施洗约翰在「靠近撒冷的哀嫩」施洗，理由是「那里水多」。确切位置至今未定。',
+    reference: '约翰福音 3:23' },
+
+  // ——— 犹太地 ———
+  { id: 'jerusalem', name: '耶路撒冷', greek: 'ΙΕΡΟΥΣΑΛΗΜ', site: 'Jerusalem', lon: 35.2310, lat: 31.7784, elev: 754,
+    region: '犹太', kind: 'gospel', theme: '受难周', date: '约公元 30–33 年', title: '最后一周',
+    description: '犹大山地分水岭上的圣殿之城，海拔约 750 米。逾越节期间人口可膨胀数倍。耶稣的骑驴进城、洁净圣殿、最后晚餐、受审、钉十字架与复活的叙事都集中在这片不到两平方公里的范围内。',
+    reference: '马可福音 11–16 章' },
+  { id: 'olives', name: '橄榄山', greek: 'ΟΡΟΣ ΤΩΝ ΕΛΑΙΩΝ', site: 'Har HaZeitim', lon: 35.2500, lat: 31.7800, elev: 826,
+    region: '犹太', kind: 'gospel', theme: '受难周', date: '受难周', title: '客西马尼与末世讲论',
+    description: '隔汲沦谷与圣殿相望，比圣殿山高约 70 米。橄榄山讲论、客西马尼祷告皆在此。',
+    reference: '马可福音 13 章；14:26–52' },
+  { id: 'bethphage', name: '伯法其', greek: 'ΒΗΘΦΑΓΗ', site: 'Bethphage', lon: 35.2530, lat: 31.7770, elev: 750,
+    region: '犹太', kind: 'gospel', theme: '受难周', date: '受难周首日', title: '骑驴进城的起点',
+    description: '橄榄山东坡的村落，门徒在此牵来驴驹。',
+    reference: '马可福音 11:1–11' },
+  { id: 'bethany', name: '伯大尼', greek: 'ΒΗΘΑΝΙΑ', site: 'al-Eizariya', lon: 35.2617, lat: 31.7714, elev: 660,
+    region: '犹太', kind: 'gospel', theme: '神迹', date: '受难周前后', title: '拉撒路复活',
+    description: '橄榄山东麓、距耶路撒冷「约有六里」的村庄。马大、马利亚与拉撒路的家，也是耶稣受难周每晚的落脚处。',
+    reference: '约翰福音 11:1–44；马可福音 11:11' },
+  { id: 'bethlehem', name: '伯利恒', greek: 'ΒΗΘΛΕΕΜ', site: 'Bethlehem', lon: 35.2024, lat: 31.7054, elev: 765,
+    region: '犹太', kind: 'gospel', theme: '生平', date: '约公元前 6–4 年', title: '降生之地',
+    description: '耶路撒冷以南约 8 公里的山城，大卫的本乡。马太与路加都将耶稣的降生置于此地。',
+    reference: '马太福音 2:1–12；路加福音 2:1–20' },
+  { id: 'herodium', name: '希律堡', greek: 'ΗΡΩΔΕΙΟΝ', site: 'Herodium', lon: 35.2414, lat: 31.6656, elev: 758,
+    region: '犹太', kind: 'town', theme: '背景', description: '希律大帝的人工锥形宫堡与陵墓，从伯利恒即可望见。' },
+  { id: 'tekoa', name: '提哥亚', greek: 'ΘΕΚΩΕ', site: 'Tuqu‘', lon: 35.2170, lat: 31.6390, elev: 825,
+    region: '犹太', kind: 'town', theme: '背景', description: '先知阿摩司的家乡，犹大旷野的西缘。' },
+  { id: 'hebron', name: '希伯仑', greek: 'ΧΕΒΡΩΝ', site: 'Hebron', lon: 35.0950, lat: 31.5250, elev: 930,
+    region: '以土买', kind: 'town', theme: '背景', description: '犹大山地最高的城，族长的埋葬地。' },
+  { id: 'emmaus', name: '以马忤斯', greek: 'ΕΜΜΑΟΥΣ', site: '数处候选（Imwas / Qubeibeh 等）', lon: 34.9894, lat: 31.8390, elev: 375,
+    region: '犹太', kind: 'gospel', theme: '受难周', date: '复活日', title: '路上的同行者',
+    description: '路加记载距耶路撒冷「约二十五里」（约 11 公里）。抄本另有「一百六十斯他丢」的异文，候选地至今有四五处。',
+    reference: '路加福音 24:13–35' },
+  { id: 'ephraim', name: '以法莲', greek: 'ΕΦΡΑΙΜ', site: 'Taybeh', lon: 35.2950, lat: 31.9540, elev: 850,
+    region: '犹太', kind: 'gospel', theme: '生平', date: '受难周之前', title: '退隐之城',
+    description: '拉撒路复活后公会定意杀耶稣，他便退到旷野边的以法莲城。',
+    reference: '约翰福音 11:54' },
+  { id: 'jericho', name: '耶利哥', greek: 'ΙΕΡΙΧΩ', site: 'Tulul Abu el-Alayiq（新城）', lon: 35.4400, lat: 31.8560, elev: -258,
+    region: '犹太', kind: 'gospel', theme: '教导', date: '最后一次上耶路撒冷', title: '撒该与瞎子',
+    description: '约旦河谷的绿洲与冬宫之城，海拔低于海平面约 258 米。由此上耶路撒冷需在约 27 公里内爬升逾一千米。',
+    reference: '路加福音 18:35–19:10；马可福音 10:46–52' },
+  { id: 'qumran', name: '昆兰', greek: '—', site: 'Khirbet Qumran', lon: 35.4590, lat: 31.7410, elev: -320,
+    region: '犹太', kind: 'town', theme: '背景', description: '死海西北岸的隐居社群聚落，死海古卷的出土地。' },
+  { id: 'engedi', name: '隐基底', greek: 'ΕΓΓΑΔΔΙ', site: 'Ein Gedi', lon: 35.3900, lat: 31.4610, elev: -100,
+    region: '犹太', kind: 'town', theme: '背景', description: '死海西岸的泉水绿洲，以椰枣与香膏著称。' },
+  { id: 'masada', name: '马撒大', greek: 'ΜΑΣΑΔΑ', site: 'Masada', lon: 35.3536, lat: 31.3156, elev: 59,
+    region: '以土买', kind: 'town', theme: '背景', description: '希律建于死海西岸孤崖上的要塞宫殿，台地高出湖岸约 450 米，海拔却只有 59 米。' },
+  { id: 'lydda', name: '吕大', greek: 'ΛΥΔΔΑ', site: 'Lod', lon: 34.8950, lat: 31.9510, elev: 55,
+    region: '犹太', kind: 'town', theme: '背景', description: '沿海平原与山地之间的行政市镇。' },
+  { id: 'arimathea', name: '亚利马太', greek: 'ΑΡΙΜΑΘΑΙΑ', site: 'Rentis（推定）', lon: 35.0400, lat: 32.0270, elev: 260,
+    region: '犹太', kind: 'gospel', theme: '受难周', date: '受难日傍晚', title: '约瑟的家乡',
+    description: '安葬耶稣的公会议员约瑟来自此城。',
+    reference: '马可福音 15:42–47' },
+  { id: 'antipatris', name: '安提帕底', greek: 'ΑΝΤΙΠΑΤΡΙΣ', site: 'Rosh HaAyin', lon: 34.9350, lat: 32.1000, elev: 45,
+    region: '犹太', kind: 'town', theme: '背景', description: '希律为纪念父亲安提帕特而建，扼守沿海干道。' },
+  { id: 'bethel', name: '伯特利', greek: 'ΒΑΙΘΗΛ', site: 'Beitin', lon: 35.2200, lat: 31.9280, elev: 880,
+    region: '犹太', kind: 'town', theme: '背景', description: '中央山脊干道上的旧约名城。' },
+  { id: 'ramah', name: '拉玛', greek: 'ΡΑΜΑ', site: 'er-Ram', lon: 35.2250, lat: 31.8460, elev: 790,
+    region: '犹太', kind: 'town', theme: '背景', description: '「在拉玛听见号啕大哭的声音」所引之地。' },
+  { id: 'beersheba', name: '别是巴', greek: 'ΒΗΡΣΑΒΕΕ', site: "Be'er Sheva", lon: 34.7900, lat: 31.2500, elev: 260,
+    region: '以土买', kind: 'town', theme: '背景', description: '传统上以色列地的南界，「从但到别是巴」。' },
+  { id: 'kerioth', name: '加略', greek: 'ΚΑΡΙΩΘ', site: 'Kh. el-Qaryatein（推定）', lon: 35.1200, lat: 31.3900, elev: 700,
+    region: '以土买', kind: 'town', theme: '背景', description: '若「加略人犹大」指地名，则他是十二门徒中唯一的犹太地人。' },
+
+  // ——— 约旦河东 ———
+  { id: 'bethabara', name: '约旦河外的伯大尼', greek: 'ΒΗΘΑΝΙΑ ΠΕΡΑΝ ΤΟΥ ΙΟΡΔΑΝΟΥ', site: 'al-Maghtas', lon: 35.5450, lat: 31.8370, elev: -370,
+    region: '比利亚', kind: 'gospel', theme: '生平', date: '公开传道之始', title: '受洗之处',
+    description: '约旦河下游东岸的渡口地带。施洗约翰在此施洗，耶稣受洗后进入旷野受试探。',
+    reference: '约翰福音 1:28；马可福音 1:9–13' },
+  { id: 'machaerus', name: '马迦鲁', greek: 'ΜΑΧΑΙΡΟΥΣ', site: 'Mukawir', lon: 35.6250, lat: 31.5670, elev: 700,
+    region: '比利亚', kind: 'gospel', theme: '背景', title: '约翰殉道之处',
+    description: '约瑟夫记载施洗约翰被囚并处死于安提帕的这座死海东岸山堡。',
+    reference: '马可福音 6:14–29（约瑟夫《犹太古史》18.119）' },
+  { id: 'livias', name: '利未亚', greek: 'ΛΙΒΙΑΣ', site: 'Tell er-Rameh', lon: 35.6200, lat: 31.8300, elev: -180,
+    region: '比利亚', kind: 'town', theme: '背景', description: '安提帕在比利亚的行政中心。' },
+  { id: 'heshbon', name: '希实本', greek: 'ΕΣΒΟΥΣ', site: 'Hisban', lon: 35.8080, lat: 31.8000, elev: 895,
+    region: '比利亚', kind: 'town', theme: '背景', description: '摩押高原边缘的古城。' },
+  { id: 'nebo', name: '尼波山', greek: 'ΝΑΒΑΥ', site: 'Jabal Nibu', lon: 35.7250, lat: 31.7680, elev: 808,
+    region: '比利亚', kind: 'town', theme: '背景', description: '摩西眺望应许之地的山头，正对耶利哥。' },
+
+  // ——— 更远的背景 ———
+  { id: 'damascus', name: '大马色', greek: 'ΔΑΜΑΣΚΟΣ', site: 'Damascus', lon: 36.3060, lat: 33.5130, elev: 690,
+    region: '叙利亚', kind: 'town', theme: '背景', description: '叙利亚行省的大城，本图东北角。' },
+];
+
+export const themes = ['全部', '生平', '教导', '神迹', '受难周', '背景'] as const;
+export type ThemeFilter = (typeof themes)[number];
