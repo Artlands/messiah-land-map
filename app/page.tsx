@@ -103,8 +103,10 @@ function useEarthControls(
     };
 
     const onPointerDown = (e: PointerEvent) => {
-      if (chrome(e)) return;
+      // Before the bail, not after: a press on an overlay control still has to
+      // clear the previous gesture, or the click suppression below eats it.
       travel = 0;
+      if (chrome(e)) return;
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pointers.size === 1) {
         grab(e.button === 1 || e.button === 2 || e.ctrlKey || e.metaKey || e.shiftKey ? 'orbit' : 'pan',
