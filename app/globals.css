@@ -101,8 +101,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .region-label { position: absolute; transform: translate(-50%, -50%); pointer-events: none; text-align: center; opacity: .62; }
 .region-label b { display: block; color: rgba(233, 220, 188, .62); font: 20px Georgia, "Songti SC", serif; letter-spacing: .45em; white-space: nowrap; }
 .region-label span { color: rgba(218, 196, 142, .37); font: 8px Georgia, serif; letter-spacing: .45em; }
-.map-marker { position: absolute; display: flex; align-items: center; gap: 8px; transform: translate(-10px, -50%); border: 0; background: none; padding: 7px; cursor: pointer; text-align: left; }
-.marker-dot { position: relative; flex: 0 0 auto; width: 12px; height: 12px; border: 1px solid rgba(231, 207, 151, .75); border-radius: 50%; background: rgba(9, 20, 21, .8); transition: transform .2s; }
+/* The dot is the click target, not the whole marker. A name is a wide box, and
+   at most attitudes some names lie across a neighbouring town's dot, which left
+   that site unreachable. Matching the target to the mark keeps what you can see
+   and what you can hit the same thing, and it is also what stops close
+   neighbours stealing each other: a target wider than the mark covers more
+   dots, not fewer. Touch has no hover and no precision, so it gets a little
+   more via ::after. */
+.map-marker { position: absolute; display: flex; align-items: center; gap: 8px; transform: translate(-10px, -50%); border: 0; background: none; padding: 7px; pointer-events: none; text-align: left; }
+@media (pointer: coarse) {
+  .marker-dot::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; }
+}
+.marker-dot { pointer-events: auto; cursor: pointer; position: relative; flex: 0 0 auto; width: 12px; height: 12px; border: 1px solid rgba(231, 207, 151, .75); border-radius: 50%; background: rgba(9, 20, 21, .8); transition: transform .2s; }
 .marker-dot i { position: absolute; inset: 3px; border-radius: 50%; background: var(--gold-bright); box-shadow: 0 0 14px rgba(226,197,123,.9); }
 .marker-label { padding: 5px 8px; background: rgba(5, 14, 16, .54); backdrop-filter: blur(4px); white-space: nowrap; }
 .marker-label b { display: block; font: 13px Georgia, "Songti SC", serif; letter-spacing: .13em; }
