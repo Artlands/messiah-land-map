@@ -1,7 +1,7 @@
 # Messiah Land Map · 弥赛亚之地
 
 An interactive relief map of first-century Israel, built on measured elevation
-data rather than decorative terrain. Rotate the land, tilt the horizon, and read
+data rather than decorative terrain. Pan the land, tilt the horizon, and read
 the Gospel narratives against the distances and height differences they actually
 happened in.
 
@@ -56,6 +56,27 @@ Boundaries are an educational approximation — no authoritative GIS dataset
 exists for them — but the place coordinates underneath are measured.
 
 ---
+
+## Controls
+
+The map follows Google Earth, so the gestures transfer without being learned:
+
+| | |
+|---|---|
+| Drag | pan the land |
+| Shift-drag, right-drag, middle-drag, Ctrl-drag | orbit — left and right rotate, up and down tilt |
+| Wheel or trackpad pinch | zoom towards the pointer |
+| Double-click | zoom into that point (Shift to zoom out) |
+| Two fingers | pinch to zoom, twist to rotate, drag up and down to tilt |
+| Arrow keys | pan; hold Shift to orbit |
+| `+` `-` `0` | zoom in, zoom out, reset the view |
+| Compass | click to face north |
+
+Zooming holds whatever sits under the pointer in place. A projected point is
+`centre + pan + Q · scale`, where `Q` depends only on the rotation and tilt and
+`scale` is proportional to the zoom while those hold, so `zoomAbout()` in
+`app/terrain.ts` corrects the pan in closed form rather than reprojecting.
+`scripts/check-view.mjs` pins that down.
 
 ## Rendering
 
@@ -162,6 +183,7 @@ scripts/
   verify-map-data.mjs   self-check for the generated map data
   build-zh-hant.mjs     regenerates app/zh-hant.ts via OpenCC
   check-en.mjs          checks app/en.json covers every visible Chinese string
+  check-view.mjs        self-check for the map view maths the controls rely on
 src/entry.tsx           mount point for the static build
 index.html              document shell for the static build
 vite.static.config.ts   static build config (GitHub Pages)
@@ -174,7 +196,8 @@ vite.config.ts          vinext + Cloudflare config (untouched)
 
 ## Development
 
-Requires Node ≥ 22.13.
+Requires Node ≥ 22.15 (`scripts/check-view.mjs` imports the TypeScript sources
+directly, via type stripping and `module.registerHooks`).
 
 ```bash
 npm install
@@ -182,6 +205,7 @@ npm run dev              # vinext dev server on :3000
 npm run verify           # check the generated map data
 npm run build:zh         # regenerate the Traditional Chinese table
 npm run check:en         # check the English table is complete
+npm run check:view       # check the pan/zoom maths
 npm run lint
 ```
 
@@ -203,7 +227,7 @@ it from anywhere else — a mismatch 404s the bundle and renders a blank page.
 
 `.github/workflows/pages.yml` runs on every push to `main`: install, verify the
 map data, confirm the Traditional Chinese table is current and the English table
-complete, build the static bundle, deploy to GitHub Pages. A failing check
+complete, check the view maths, build the static bundle, deploy to GitHub Pages. A failing check
 blocks the deploy.
 
 ---

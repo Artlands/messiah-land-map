@@ -87,7 +87,11 @@ export function shoreLon(lat: number) {
 
 // ---------------------------------------------------------------- geometry
 
-export type View = { rotation: number; tilt: number; zoom: number; perspective: boolean };
+export type View = {
+  rotation: number; tilt: number; zoom: number; perspective: boolean;
+  /** Pan offset in canvas pixels, applied after the frame is fitted. */
+  panX: number; panY: number;
+};
 export type Frame = { cx: number; cy: number; scale: number; view: View };
 
 export type Projected = { x: number; y: number; depth: number };
@@ -132,6 +136,37 @@ export function project(u: number, v: number, h: number, f: Frame): Projected {
 export const projectGeo = (lon: number, lat: number, h: number, f: Frame) =>
   project(normLon(lon), normLat(lat), h, f);
 
+export const ZOOM = { min: 0.7, max: 6 };
+/** Tilt is measured up from a side-on view: 1.5 rad is all but straight down. */
+export const TILT = { min: 0.16, max: 1.5 };
+
+export const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+/** Keep the terrain from being dragged entirely out of the viewport. */
+export const clampPan = (n: number, extent: number) => clamp(n, -extent * 0.6, extent * 0.6);
+
+/**
+ * Zoom by `factor` while holding whatever sits at canvas pixel (ax, ay) still,
+ * the way a wheel over a point on the ground behaves in Google Earth.
+ *
+ * A projected point is `centre + pan + Q * scale`, where Q depends only on the
+ * rotation and tilt, and `scale` is proportional to `zoom` while those hold. So
+ * the correction is exact and needs no reprojection: shift the pan by however
+ * far the anchor would otherwise have travelled. The pan clamp can pull it off
+ * the anchor, but only once the view is already at the edge of its travel.
+ */
+export function zoomAbout(
+  view: View, factor: number, ax: number, ay: number, width: number, height: number,
+): View {
+  const zoom = clamp(view.zoom * factor, ZOOM.min, ZOOM.max);
+  const k = 1 - zoom / view.zoom;
+  return {
+    ...view,
+    zoom,
+    panX: clampPan(view.panX + (ax - width / 2 - view.panX) * k, width),
+    panY: clampPan(view.panY + (ay - height / 2 - view.panY) * k, height),
+  };
+}
+
 /** Fit the rotated frame to the canvas so nothing clips at any rotation. */
 export function makeFrame(view: View, width: number, height: number): Frame {
   const hi = relief(elevationRange.hi);
@@ -154,8 +189,8 @@ export function makeFrame(view: View, width: number, height: number): Frame {
   const scale = Math.min(width * 0.9 / (maxX - minX), height * 0.88 / (maxY - minY)) * view.zoom;
   return {
     scale,
-    cx: width / 2 - ((minX + maxX) / 2) * scale,
-    cy: height / 2 - ((minY + maxY) / 2) * scale,
+    cx: width / 2 - ((minX + maxX) / 2) * scale + view.panX,
+    cy: height / 2 - ((minY + maxY) / 2) * scale + view.panY,
     view,
   };
 }

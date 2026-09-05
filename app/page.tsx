@@ -6,8 +6,8 @@ import { regionLabels, regions, peaks, lakes } from './geo';
 import { toTraditional } from './zh-hant';
 import { toEnglish } from './en';
 import {
-  drawScene, elevationAt, elevationRange, hypsometric, makeFrame, normLat, normLon,
-  project, regionAt, relief, RULER_TINT, type Frame, type View,
+  clamp, clampPan, drawScene, elevationAt, elevationRange, hypsometric, makeFrame, normLat,
+  normLon, project, regionAt, relief, RULER_TINT, TILT, zoomAbout, type Frame, type View,
 } from './terrain';
 
 const RULERS: { key: keyof typeof RULER_TINT; name: string; note: string }[] = [
@@ -35,7 +35,186 @@ const rgb = (c: [number, number, number]) => `rgb(${c[0]},${c[1]},${c[2]})`;
  */
 const SEA_LABEL = { lon: 34.56, lat: 32.7 };
 
-const DEFAULT_VIEW: View = { rotation: -0.1, tilt: 0.62, zoom: 1, perspective: false };
+/** Kept out of the JSX so the English-table extractor sees one plain literal. */
+const STAGE_LABEL = '地形视图 · 方向键平移，Shift + 方向键旋转俯仰，加减号缩放';
+
+const DEFAULT_VIEW: View = { rotation: -0.1, tilt: 0.62, zoom: 1, perspective: false, panX: 0, panY: 0 };
+
+/**
+ * The control scheme Google Earth uses. Drag the ground to pan it, hold Ctrl / Shift
+ * or use the right or middle button to orbit, wheel towards the cursor to zoom,
+ * two fingers to pinch, twist and tilt, double-click to zoom into a point.
+ *
+ * The listeners are native rather than React props because React registers
+ * `wheel` passively, so its handler cannot cancel the page scroll.
+ *
+ * Returns the zoom primitive so the on-screen buttons and the keyboard reuse
+ * the same cursor-anchored maths.
+ */
+function useEarthControls(
+  ref: React.RefObject<HTMLDivElement | null>,
+  view: View,
+  setView: React.Dispatch<React.SetStateAction<View>>,
+) {
+  const viewRef = useRef(view);
+  useEffect(() => { viewRef.current = view; }, [view]);
+
+  const zoomAt = useCallback((factor: number, px?: number, py?: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    setView((v) => zoomAbout(v, factor, px ?? w / 2, py ?? h / 2, w, h));
+  }, [ref, setView]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const pointers = new Map<number, { x: number; y: number }>();
+    let drag: { mode: 'pan' | 'orbit'; x: number; y: number; from: View } | null = null;
+    let pinch: { dist: number; angle: number; x: number; y: number } | null = null;
+    let travel = 0;
+
+    /**
+     * Overlay controls swallow a gesture, the site markers do not — they cover
+     * enough of the land that bailing on them would leave dead patches you
+     * cannot drag from. A marker still selects on a click; `travel` is what
+     * separates that click from the tail of a pan.
+     */
+    const chrome = (e: Event) => {
+      const hit = (e.target as HTMLElement).closest('button, a');
+      return hit !== null && !hit.classList.contains('map-marker');
+    };
+
+    const twoFinger = () => {
+      const [a, b] = [...pointers.values()];
+      return {
+        dist: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+        angle: Math.atan2(b.y - a.y, b.x - a.x),
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2,
+      };
+    };
+
+    const grab = (mode: 'pan' | 'orbit', x: number, y: number) => {
+      drag = { mode, x, y, from: viewRef.current };
+      el.dataset.grab = mode;
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (chrome(e)) return;
+      travel = 0;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 1) {
+        grab(e.button === 1 || e.button === 2 || e.ctrlKey || e.metaKey || e.shiftKey ? 'orbit' : 'pan',
+          e.clientX, e.clientY);
+      } else {
+        drag = null;
+        pinch = twoFinger();
+      }
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      // Capture on the first move rather than on press: a captured pointer
+      // retargets its click to the capturing element, which would stop a
+      // marker from ever seeing the click that selects it.
+      if (!el.hasPointerCapture(e.pointerId)) el.setPointerCapture(e.pointerId);
+
+      if (pointers.size >= 2 && pinch) {
+        const now = twoFinger();
+        const was = pinch;
+        pinch = now;
+        travel = 8;
+        setView((v) => ({
+          ...v,
+          rotation: v.rotation + (now.angle - was.angle),
+          tilt: clamp(v.tilt + (now.y - was.y) * 0.004, TILT.min, TILT.max),
+        }));
+        const box = el.getBoundingClientRect();
+        zoomAt(now.dist / was.dist, now.x - box.left, now.y - box.top);
+        return;
+      }
+
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      travel = Math.max(travel, Math.hypot(dx, dy));
+      const from = drag.from;
+      if (drag.mode === 'pan') {
+        setView((v) => ({
+          ...v,
+          panX: clampPan(from.panX + dx, el.clientWidth),
+          panY: clampPan(from.panY + dy, el.clientHeight),
+        }));
+      } else {
+        setView((v) => ({
+          ...v,
+          rotation: from.rotation + dx * 0.006,
+          tilt: clamp(from.tilt + dy * 0.004, TILT.min, TILT.max),
+        }));
+      }
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinch = null;
+      if (pointers.size === 1) {
+        // Lifting one finger of a pinch hands the gesture to the one still down.
+        const [rest] = [...pointers.values()];
+        grab('pan', rest.x, rest.y);
+      } else if (pointers.size === 0) {
+        drag = null;
+        delete el.dataset.grab;
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const box = el.getBoundingClientRect();
+      // Line-mode wheels report a few lines, a trackpad pinch reports tiny
+      // pixel deltas with ctrlKey set; both need scaling into the same range.
+      const delta = e.deltaY * (e.deltaMode === 1 ? 16 : 1) * (e.ctrlKey ? 5 : 1);
+      zoomAt(Math.exp(-clamp(delta, -400, 400) * 0.0016), e.clientX - box.left, e.clientY - box.top);
+    };
+
+    // A pan that ends over a marker must not also select it.
+    const onClickCapture = (e: MouseEvent) => {
+      if (travel > 4) { e.stopPropagation(); e.preventDefault(); }
+    };
+
+    const onDoubleClick = (e: MouseEvent) => {
+      if (chrome(e)) return;
+      const box = el.getBoundingClientRect();
+      zoomAt(e.shiftKey ? 1 / 1.7 : 1.7, e.clientX - box.left, e.clientY - box.top);
+    };
+
+    const onContextMenu = (e: MouseEvent) => e.preventDefault();
+
+    el.addEventListener('pointerdown', onPointerDown);
+    el.addEventListener('pointermove', onPointerMove);
+    el.addEventListener('pointerup', onPointerUp);
+    el.addEventListener('pointercancel', onPointerUp);
+    el.addEventListener('wheel', onWheel, { passive: false });
+    el.addEventListener('click', onClickCapture, true);
+    el.addEventListener('dblclick', onDoubleClick);
+    el.addEventListener('contextmenu', onContextMenu);
+    return () => {
+      el.removeEventListener('pointerdown', onPointerDown);
+      el.removeEventListener('pointermove', onPointerMove);
+      el.removeEventListener('pointerup', onPointerUp);
+      el.removeEventListener('pointercancel', onPointerUp);
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('click', onClickCapture, true);
+      el.removeEventListener('dblclick', onDoubleClick);
+      el.removeEventListener('contextmenu', onContextMenu);
+    };
+  }, [ref, setView, zoomAt]);
+
+  return zoomAt;
+}
 
 function useSize<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -79,15 +258,15 @@ function TerrainCanvas({ view, size, showRegions, highlightRegion }: {
   return <canvas ref={canvasRef} className="terrain-canvas" style={{ width: size.width, height: size.height }} aria-hidden="true" />;
 }
 
-function Compass({ rotation }: { rotation: number }) {
+function Compass({ rotation, onReset }: { rotation: number; onReset: () => void }) {
   return (
-    <div className="compass" aria-label="地图方向">
+    <button className="compass" onClick={onReset} aria-label="正北朝上">
       <div className="compass-ring" style={{ transform: `rotate(${rotation}rad)` }}>
         <span className="north">N</span>
         <span className="south">S</span>
         <i />
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -103,7 +282,7 @@ export default function Home() {
     return saved === 'hant' || saved === 'en' ? saved : 'hans';
   });
   const { ref: mapRef, size } = useSize<HTMLDivElement>();
-  const dragRef = useRef<{ x: number; y: number; rotation: number; tilt: number } | null>(null);
+  const zoomAt = useEarthControls(mapRef, view, setView);
 
   const active = places.find((p) => p.id === activeId) ?? places[0];
   const story = useMemo(() => places.filter((p) => p.kind === 'gospel'), []);
@@ -293,25 +472,25 @@ export default function Home() {
         <div
           className="map-stage"
           ref={mapRef}
-          onPointerDown={(e) => {
-            if ((e.target as HTMLElement).closest('button, a')) return;
-            dragRef.current = { x: e.clientX, y: e.clientY, rotation: view.rotation, tilt: view.tilt };
-            e.currentTarget.setPointerCapture(e.pointerId);
-          }}
-          onPointerMove={(e) => {
-            const d = dragRef.current;
-            if (!d) return;
-            setView((v) => ({
-              ...v,
-              rotation: d.rotation + (e.clientX - d.x) * 0.006,
-              tilt: Math.max(0.16, Math.min(1.35, d.tilt + (e.clientY - d.y) * 0.004)),
-            }));
-          }}
-          onPointerUp={() => { dragRef.current = null; }}
-          onPointerCancel={() => { dragRef.current = null; }}
-          onWheel={(e) => {
+          tabIndex={0}
+          role="application"
+          aria-label={STAGE_LABEL}
+          onKeyDown={(e) => {
+            const nudge = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+            if (nudge) {
+              const [kx, ky] = nudge;
+              setView((v) => e.shiftKey
+                ? { ...v, rotation: v.rotation + kx * 0.12, tilt: clamp(v.tilt + ky * 0.08, TILT.min, TILT.max) }
+                : {
+                    ...v,
+                    panX: clampPan(v.panX - kx * 60, size.width),
+                    panY: clampPan(v.panY - ky * 60, size.height),
+                  });
+            } else if (e.key === '+' || e.key === '=') zoomAt(1.25);
+            else if (e.key === '-' || e.key === '_') zoomAt(1 / 1.25);
+            else if (e.key === '0') setView((v) => ({ ...DEFAULT_VIEW, perspective: v.perspective }));
+            else return;
             e.preventDefault();
-            setView((v) => ({ ...v, zoom: Math.max(0.7, Math.min(3.2, v.zoom - e.deltaY * 0.0009)) }));
           }}
         >
           <TerrainCanvas view={view} size={size} showRegions={showRegions} highlightRegion={highlightRegion} />
@@ -384,14 +563,14 @@ export default function Home() {
           </div>
 
           <div className="view-tools" aria-label="地图视图控制">
-            <button onClick={() => setView((v) => ({ ...v, zoom: Math.min(3.2, v.zoom * 1.18) }))} aria-label="放大">＋</button>
-            <button onClick={() => setView((v) => ({ ...v, zoom: Math.max(0.7, v.zoom / 1.18) }))} aria-label="缩小">−</button>
+            <button onClick={() => zoomAt(1.25)} aria-label="放大">＋</button>
+            <button onClick={() => zoomAt(1 / 1.25)} aria-label="缩小">−</button>
             <button onClick={() => setView((v) => ({ ...DEFAULT_VIEW, perspective: v.perspective }))} aria-label="重置视图">⌂</button>
             <button className={view.perspective ? 'on' : ''} onClick={() => setView((v) => ({ ...v, perspective: !v.perspective }))} aria-label="切换透视投影">⏢</button>
             <button className={showRegions ? 'on' : ''} onClick={() => setShowRegions((s) => !s)} aria-label="切换分封疆界">▧</button>
             <button className={showTowns ? 'on' : ''} onClick={() => setShowTowns((s) => !s)} aria-label="切换城邑标注">◦</button>
           </div>
-          <Compass rotation={view.rotation} />
+          <Compass rotation={view.rotation} onReset={() => setView((v) => ({ ...v, rotation: 0 }))} />
 
           <div className="filter-bar" aria-label="事件类型筛选">
             {themes.map((item) => (
@@ -399,7 +578,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="map-hint"><span>↔</span> 拖动旋转 · 上下拖动改变俯角 · 滚轮缩放</div>
+          <div className="map-hint"><span>✥</span> 拖动平移 · Shift 或右键拖动旋转俯仰 · 滚轮缩放 · 双击放大</div>
 
           <aside className={`story-panel ${panelOpen ? 'open' : ''}`} aria-live="polite">
             <button className="close-panel" onClick={() => setPanelOpen(false)} aria-label="关闭地点详情">×</button>

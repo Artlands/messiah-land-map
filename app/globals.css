@@ -82,7 +82,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
     radial-gradient(ellipse at 46% 46%, #112d31 0, #081619 48%, #050d10 76%);
   background-size: 52px 52px, 52px 52px, auto;
 }
-.map-stage:active { cursor: grabbing; }
+.map-stage:focus-visible { outline: 1px solid rgba(203,171,97,.5); outline-offset: -3px; }
+.map-stage[data-grab="pan"] { cursor: grabbing; }
+.map-stage[data-grab="orbit"] { cursor: all-scroll; }
 .terrain-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-glow { pointer-events: none; position: absolute; inset: 0; background: radial-gradient(circle at 43% 38%, transparent 25%, rgba(3, 9, 11, .4) 67%, rgba(3, 8, 10, .82) 100%); }
 .map-heading { position: absolute; left: clamp(24px, 5vw, 76px); top: 54px; cursor: auto; }
@@ -112,7 +114,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .view-tools button { width: 38px; height: 38px; border: 0; border-bottom: 1px solid var(--line); background: rgba(6,16,19,.7); cursor: pointer; color: #b3b8ae; }
 .view-tools button:last-child { border-bottom: 0; }
 .view-tools button:hover { background: rgba(200,167,93,.16); color: var(--gold-bright); }
-.compass { position: absolute; left: clamp(80px, 10vw, 150px); bottom: 91px; width: 58px; height: 58px; }
+.compass { position: absolute; left: clamp(80px, 10vw, 150px); bottom: 91px; width: 58px; height: 58px; padding: 0; border: 0; background: none; cursor: pointer; }
+.compass:hover .compass-ring { border-color: rgba(207,191,153,.5); }
 .compass-ring { width: 100%; height: 100%; border: 1px solid rgba(207,191,153,.23); border-radius: 50%; position: relative; transition: transform .1s; }
 .compass-ring span { position: absolute; left: 50%; transform: translateX(-50%); font: 8px Georgia, serif; }
 .compass-ring .north { top: 5px; color: var(--gold-bright); }

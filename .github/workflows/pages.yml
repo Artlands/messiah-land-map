@@ -32,6 +32,8 @@ jobs:
           git diff --exit-code app/zh-hant.ts
       - name: Check every Chinese string has an English form
         run: npm run check:en
+      - name: Check the map view maths
+        run: npm run check:view
       - run: npm run build:static
         env:
           PAGES_BASE: /${{ github.event.repository.name }}/

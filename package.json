@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=22.15.0"
   },
   "scripts": {
     "dev": "vinext dev",
@@ -14,7 +14,8 @@
     "preview:static": "vite preview --config vite.static.config.ts",
     "verify": "node scripts/verify-map-data.mjs",
     "build:zh": "node scripts/build-zh-hant.mjs",
-    "check:en": "node scripts/check-en.mjs"
+    "check:en": "node scripts/check-en.mjs",
+    "check:view": "node scripts/check-view.mjs"
   },
   "dependencies": {
     "next": "16.2.6",
