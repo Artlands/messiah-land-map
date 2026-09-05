@@ -14,7 +14,8 @@ import { registerHooks } from 'node:module';
 registerHooks({
   resolve: (spec, ctx, next) => next(spec.startsWith('.') && !spec.includes('.ts') ? `${spec}.ts` : spec, ctx),
 });
-const { EXAGGERATION, clampPan, elevationAt, makeFrame, projectGeo, relief, zoomAbout } =
+const { DEM, DEM_NX, BOUNDS } = await import('../app/geo.ts');
+const { EXAGGERATION, clampPan, elevationAt, groundAt, makeFrame, projectGeo, relief, zoomAbout } =
   await import('../app/terrain.ts');
 
 const W = 1200;
@@ -23,6 +24,19 @@ const at = (view, lon, lat) =>
   projectGeo(lon, lat, relief(elevationAt(lon, lat)), makeFrame(view, W, H));
 
 const base = { rotation: -0.4, tilt: 0.62, zoom: 1, perspective: false, panX: 40, panY: -25 };
+
+// Markers and labels must sit on the drawn surface, not above it. A lift in
+// frame units is a fixed altitude rather than a fixed gap, so it grows as a
+// share of the relief whenever EXAGGERATION drops, and the pins start to hover.
+// Sampling at DEM nodes is exact: that is where drawScene puts the mesh.
+const step = { x: (BOUNDS.e - BOUNDS.w) / (DEM_NX - 1), y: (BOUNDS.n - BOUNDS.s) / (DEM.length / DEM_NX - 1) };
+for (const [i, j] of [[10, 10], [60, 40], [95, 120], [40, 150]]) {
+  const lon = BOUNDS.w + i * step.x;
+  const lat = BOUNDS.n - j * step.y;
+  const mesh = relief(DEM[j * DEM_NX + i]);
+  assert.equal(groundAt(lon, lat).toFixed(9), mesh.toFixed(9),
+    `anchor at ${lon.toFixed(2)}, ${lat.toFixed(2)} is off the mesh — a lift has crept back in`);
+}
 
 // A point under the cursor stays under it, zooming either way, in both projections.
 for (const perspective of [false, true]) {
@@ -64,4 +78,4 @@ for (const [file, re] of quoted) {
   assert.equal(Number(hit[1]), EXAGGERATION, `${file} says ${hit[1]}×, EXAGGERATION is ${EXAGGERATION}`);
 }
 
-console.log(`ok — ${EXAGGERATION}× exaggeration quoted consistently, anchored zoom holds within 0.5 px, limits and pan clamp hold`);
+console.log(`ok — anchors sit on the mesh, ${EXAGGERATION}× exaggeration quoted consistently, zoom holds within 0.5 px, limits and pan clamp hold`);

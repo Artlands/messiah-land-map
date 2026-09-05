@@ -139,6 +139,16 @@ export function project(u: number, v: number, h: number, f: Frame): Projected {
 export const projectGeo = (lon: number, lat: number, h: number, f: Frame) =>
   project(normLon(lon), normLat(lat), h, f);
 
+/**
+ * Height of the drawn surface at a point, in frame units — the same height
+ * `drawScene` paints the mesh at. Markers and labels anchor to this and add
+ * nothing on top: a lift in frame units is a fixed altitude, not a fixed gap
+ * above the ground, so it grows as a share of the relief every time
+ * EXAGGERATION comes down and starts reading as a hover. A visual gap belongs
+ * in CSS pixels, which no projection parameter can stretch.
+ */
+export const groundAt = (lon: number, lat: number) => relief(elevationAt(lon, lat));
+
 export const ZOOM = { min: 0.7, max: 6 };
 /** Tilt is measured up from a side-on view: 1.5 rad is all but straight down. */
 export const TILT = { min: 0.16, max: 1.5 };

@@ -6,7 +6,7 @@ import { regionLabels, regions, peaks, lakes } from './geo';
 import { toTraditional } from './zh-hant';
 import { toEnglish } from './en';
 import {
-  clamp, clampPan, drawScene, elevationAt, elevationRange, hypsometric, makeFrame, normLat,
+  clamp, clampPan, drawScene, elevationRange, groundAt, hypsometric, makeFrame, normLat,
   normLon, project, regionAt, relief, RULER_TINT, TILT, zoomAbout, type Frame, type View,
 } from './terrain';
 
@@ -310,7 +310,7 @@ export default function Home() {
       (p.id === activeId ? 30 : 0) + (p.kind === 'gospel' ? 10 : p.kind === 'decapolis' ? 4 : 0);
     const laid = visible
       .map((p) => {
-        const q = project(normLon(p.lon), normLat(p.lat), relief(elevationAt(p.lon, p.lat)) + 0.018, frame);
+        const q = project(normLon(p.lon), normLat(p.lat), groundAt(p.lon, p.lat), frame);
         const wide = p.kind === 'gospel' || p.id === activeId;
         return {
           place: p,
@@ -337,10 +337,11 @@ export default function Home() {
     return laid;
   }, [visible, frame, activeId, lang]);
 
-  const seaLabel = project(normLon(SEA_LABEL.lon), normLat(SEA_LABEL.lat), 0.004, frame);
+  // The Mediterranean is drawn at sea level, so its label sits on that plane.
+  const seaLabel = project(normLon(SEA_LABEL.lon), normLat(SEA_LABEL.lat), 0, frame);
 
-  const anchor = useCallback((lon: number, lat: number, lift: number) => {
-    const p = project(normLon(lon), normLat(lat), relief(elevationAt(lon, lat)) + lift, frame);
+  const anchor = useCallback((lon: number, lat: number) => {
+    const p = project(normLon(lon), normLat(lat), groundAt(lon, lat), frame);
     return { left: p.x, top: p.y, zIndex: Math.round((p.depth + 1) * 200) };
   }, [frame]);
 
@@ -498,14 +499,14 @@ export default function Home() {
           <TerrainCanvas view={view} size={size} showRegions={showRegions} highlightRegion={highlightRegion} />
 
           {showRegions && regionLabels.map((r) => (
-            <div className="region-label" key={r.name} style={anchor(r.lon, r.lat, 0.012)}>
+            <div className="region-label" key={r.name} style={anchor(r.lon, r.lat)}>
               <b>{r.name}</b><span>{r.sub}</span>
             </div>
           ))}
 
           {lakes.filter((l) => l.name).map((l) => {
             const c = l.ring.reduce((a, p) => [a[0] + p[0] / l.ring.length, a[1] + p[1] / l.ring.length], [0, 0]);
-            const p = project(normLon(c[0]), normLat(c[1]), relief(l.surface) + 0.004, frame);
+            const p = project(normLon(c[0]), normLat(c[1]), relief(l.surface), frame);
             return (
               <div className="water-label" key={l.id} style={{ left: p.x, top: p.y }}>
                 <b>{l.name}</b><span>{l.surface} m</span>
@@ -518,7 +519,7 @@ export default function Home() {
           </div>
 
           {peaks.filter((pk) => !places.some((p) => p.name === pk.name)).map((pk) => (
-            <div className="peak-label" key={pk.name} style={anchor(pk.lon, pk.lat, 0.006)}>
+            <div className="peak-label" key={pk.name} style={anchor(pk.lon, pk.lat)}>
               <i>▲</i><b>{pk.name}</b><span>{pk.elev} m</span>
             </div>
           ))}
