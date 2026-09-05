@@ -14,7 +14,7 @@ import { registerHooks } from 'node:module';
 registerHooks({
   resolve: (spec, ctx, next) => next(spec.startsWith('.') && !spec.includes('.ts') ? `${spec}.ts` : spec, ctx),
 });
-const { clampPan, elevationAt, makeFrame, projectGeo, relief, zoomAbout } =
+const { EXAGGERATION, clampPan, elevationAt, makeFrame, projectGeo, relief, zoomAbout } =
   await import('../app/terrain.ts');
 
 const W = 1200;
@@ -48,4 +48,20 @@ assert.equal(zoomAbout({ ...base, zoom: 0.8 }, 0.1, 300, 300, W, H).zoom, 0.7);
 assert.equal(clampPan(9999, W), W * 0.6);
 assert.equal(clampPan(-9999, H), -H * 0.6);
 
-console.log('ok — anchored zoom holds within 0.5 px, limits and pan clamp hold');
+// The hero note and the legend both quote the vertical exaggeration, and both
+// are translation keys, so the figure cannot be interpolated in. Check it here
+// instead, which keeps app/terrain.ts the only place to tune it.
+const { readFileSync } = await import('node:fs');
+const quoted = [
+  ['app/page.tsx', /垂直方向放大约 (\d+) 倍/],
+  ['app/page.tsx', /垂直放大 (\d+)×/],
+  ['app/en.json', /exaggerated about (\d+)×/],
+  ['app/en.json', /Measured elevation · (\d+)× vertical/],
+];
+for (const [file, re] of quoted) {
+  const hit = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8').match(re);
+  assert.ok(hit, `${file} no longer quotes the vertical exaggeration as ${re}`);
+  assert.equal(Number(hit[1]), EXAGGERATION, `${file} says ${hit[1]}×, EXAGGERATION is ${EXAGGERATION}`);
+}
+
+console.log(`ok — ${EXAGGERATION}× exaggeration quoted consistently, anchored zoom holds within 0.5 px, limits and pan clamp hold`);

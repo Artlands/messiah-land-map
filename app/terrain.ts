@@ -8,10 +8,13 @@ const ASPECT = ((E - W) * Math.cos(MID_LAT)) / (N - S);
 /** North–south extent of the frame, in metres. */
 const SPAN_M = (N - S) * 111_320;
 /**
- * Vertical exaggeration. At 1x the whole relief is 0.8% of the frame and invisible;
- * printed relief atlases of this region use roughly 8–15x. Tune here, nowhere else.
+ * Vertical exaggeration. At 1x the whole relief is 0.8% of the frame and
+ * invisible; printed relief atlases of this region use roughly 8–15x, so 5x
+ * reads flatter than an atlas would draw it and closer to the true profile.
+ * The two labels that quote the figure are checked against it by
+ * scripts/check-view.mjs, so this stays the one place to tune.
  */
-const EXAGGERATION = 11;
+export const EXAGGERATION = 5;
 
 export const normLon = (lon: number) => (lon - W) / (E - W);
 export const normLat = (lat: number) => (N - lat) / (N - S);

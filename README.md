@@ -97,9 +97,11 @@ library. `app/terrain.ts` holds the whole renderer:
   painter's-algorithm list, so the sea occludes correctly even at a low horizon.
   Land cells are clamped to the shoreline, which keeps the coast a clean line
   instead of a staircase of half-submerged cells.
-- **Vertical exaggeration** — `EXAGGERATION = 11` in `app/terrain.ts`. At 1× the
+- **Vertical exaggeration** — `EXAGGERATION = 5` in `app/terrain.ts`. At 1× the
   entire relief is 0.8% of the frame and invisible; printed relief atlases of
-  this region use roughly 8–15×.
+  this region use roughly 8–15×, so 5× reads flatter than an atlas and closer
+  to the true profile. Two labels quote the figure; `npm run check:view` fails
+  if they drift from it.
 - **Responsiveness** — a coarse mesh draws immediately on interaction, the full
   2 km mesh once the view settles.
 

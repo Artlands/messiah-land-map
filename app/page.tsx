@@ -467,7 +467,7 @@ export default function Home() {
             开始探索 <span>↘</span>
           </button>
         </div>
-        <div className="hero-note"><span>01</span><p>垂直方向放大约 11 倍，否则整片高地在这个跨度下几乎是平的。平面位置与高程数值均为实测值。</p></div>
+        <div className="hero-note"><span>01</span><p>垂直方向放大约 5 倍，否则整片高地在这个跨度下几乎是平的。平面位置与高程数值均为实测值。</p></div>
       </section>
 
       <section className="map-section" id="map" aria-label="耶稣时代以色列互动地图">
@@ -551,7 +551,7 @@ export default function Home() {
               <b>{Math.round(elevationRange.hi)} m</b>
               <b>{Math.round(elevationRange.lo)} m</b>
             </div>
-            <small>实测高程 · 垂直放大 11×</small>
+            <small>实测高程 · 垂直放大 5×</small>
           </div>
 
           <div className="ruler-legend" aria-label="公元 30 年前后的管辖分区">
