@@ -312,10 +312,26 @@ export default function Home() {
     [filter, showTowns],
   );
 
+/**
+ * Marker geometry, measured off the rendered CSS: the dot spans -6..+12 across
+ * the anchor once hover scales it, and a name starts 17px out on whichever side
+ * it is placed.
+ */
+const DOT = { x0: -6, x1: 12, y0: -9, y1: 9 };
+const NAME_OFFSET = 17;
+
+type Box = { x0: number; x1: number; y0: number; y1: number };
+const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+
   /**
    * Greedy label declutter: dots always draw, names drop out when they would
    * collide with one already placed. Gospel sites outrank towns, the selected
    * site outranks everything, and near beats far on a tie.
+   *
+   * Every dot is reserved before any name is placed. Both are clickable and the
+   * topmost wins, so a name lying over a neighbouring dot does not merely look
+   * untidy, it takes the clicks meant for that site. A name blocked on the right is tried
+   * on the left before it is dropped.
    */
   const markers = useMemo(() => {
     const rank = (p: Place) =>
@@ -332,20 +348,34 @@ export default function Home() {
           w: (lang === 'en'
             ? toEnglish(p.name).length * (wide ? 7.5 : 5.5)
             : p.name.length * (wide ? 15 : 12)) + 34,
-          h: wide ? 36 : 24,
+          h: wide ? 37 : 24,
           label: true,
+          flip: false,
         };
       })
       .sort((a, b) => rank(b.place) - rank(a.place) || b.z - a.z);
-    const taken: { x0: number; x1: number; y0: number; y1: number }[] = [];
-    for (const m of laid) {
-      const box = { x0: m.x + 8, x1: m.x + 8 + m.w, y0: m.y - m.h / 2, y1: m.y + m.h / 2 };
-      if (taken.some((t) => box.x0 < t.x1 && box.x1 > t.x0 && box.y0 < t.y1 && box.y1 > t.y0)) {
-        m.label = false;
+
+    const dots: Box[] = laid.map((m) => ({
+      x0: m.x + DOT.x0, x1: m.x + DOT.x1, y0: m.y + DOT.y0, y1: m.y + DOT.y1,
+    }));
+    const taken: Box[] = [];
+    laid.forEach((m, i) => {
+      const y0 = m.y - m.h / 2;
+      const y1 = m.y + m.h / 2;
+      const sides = [
+        { flip: false, box: { x0: m.x + NAME_OFFSET, x1: m.x + NAME_OFFSET + m.w, y0, y1 } },
+        { flip: true, box: { x0: m.x - NAME_OFFSET - m.w, x1: m.x - NAME_OFFSET, y0, y1 } },
+      ];
+      // Its own dot is the one a name is allowed to sit beside.
+      const free = sides.find(({ box }) =>
+        !taken.some((t) => hits(box, t)) && !dots.some((d, j) => j !== i && hits(box, d)));
+      if (free) {
+        m.flip = free.flip;
+        taken.push(free.box);
       } else {
-        taken.push(box);
+        m.label = false;
       }
-    }
+    });
     return laid;
   }, [visible, frame, activeId, lang]);
 
@@ -536,10 +566,10 @@ export default function Home() {
             </div>
           ))}
 
-          {markers.map(({ place, x, y, z, label }) => (
+          {markers.map(({ place, x, y, z, label, flip }) => (
             <button
               key={place.id}
-              className={`map-marker kind-${place.kind} ${activeId === place.id ? 'active' : ''} ${label ? '' : 'no-label'}`}
+              className={`map-marker kind-${place.kind} ${activeId === place.id ? 'active' : ''} ${label ? '' : 'no-label'} ${flip ? 'flip' : ''}`}
               style={{ left: x, top: y, zIndex: z }}
               onClick={() => selectPlace(place)}
               aria-label={place.name}
