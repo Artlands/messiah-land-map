@@ -17,16 +17,17 @@ this document is the technical reference.
 
 | Layer | Source | Notes |
 | --- | --- | --- |
-| Terrain | NASA SRTM, sampled on a 0.02° grid | 116 × 158 = 18,328 nodes, 34.20–36.50°E / 30.60–33.75°N |
+| Terrain | GMRT, resampled onto a 0.005° grid | 461 × 631 = 290,891 nodes, 34.20–36.50°E / 30.60–33.75°N |
 | Coastline | Natural Earth 10m physical | Real shore, including the Carmel headland and the Bay of Haifa |
 | Lakes | Natural Earth 10m physical | Sea of Galilee, Dead Sea, plus Lake Huleh reconstructed |
 | Rivers | Natural Earth 10m river centrelines | Jordan (upper and lower), Yarmuk, Jabbok, Arnon, Zered, Kishon, Yarkon |
 | Regions | Digitised from standard historical atlases | 10 polygons for the tetrarchy c. AD 30 |
 | Places | 62 sites at surveyed coordinates | Gospel events, towns, and Decapolis cities |
 
-Elevation in the sampled grid runs from **−415 m** (the Dead Sea surface) to
-**2,561 m** (the Hermon massif). The true Hermon summit is 2,814 m — a 2 km grid
-smooths isolated peaks, and the map does not pretend otherwise.
+Elevation in the sampled grid runs from **−429 m** (the Dead Sea surface) to
+**2,773 m** (the Hermon massif). The true Hermon summit is 2,814 m — even a 550 m
+grid smooths an isolated peak a little, and the map does not pretend otherwise.
+It used to be a 2 km grid, where the same summit came out at 2,561 m.
 
 ### First-century corrections
 
@@ -103,7 +104,10 @@ library. `app/terrain.ts` holds the whole renderer:
   to the true profile. Two labels quote the figure; `npm run check:view` fails
   if they drift from it.
 - **Responsiveness** — a coarse mesh draws immediately on interaction, the full
-  2 km mesh once the view settles.
+  mesh once the view settles. That full pass is most of three hundred thousand
+  quads and takes about 310 ms, so the interactive one aims at a fixed budget of
+  ~15,000 cells and works out its own stride (`DRAFT_STRIDE`) — change the grid
+  step and the drag stays exactly as responsive.
 
 Labels declutter greedily: dots always draw, names drop out when they would
 collide with one already placed. Gospel sites outrank towns, the selected site
@@ -204,6 +208,7 @@ directly, via type stripping and `module.registerHooks`).
 ```bash
 npm install
 npm run dev              # vinext dev server on :3000
+npm run build:dem        # refetch the elevation grid from GMRT
 npm run verify           # check the generated map data
 npm run build:zh         # regenerate the Traditional Chinese table
 npm run check:en         # check the English table is complete
@@ -258,13 +263,25 @@ elevation (434 m and 350 m, against true elevations of 59 m and 144 m).
 
 ## Regenerating `app/geo.ts`
 
-The generator is not checked in; the data is static and was produced once. For
-the record, the pipeline was:
+The elevation half of the generator is `scripts/build-dem.mjs`; the vector half
+is not checked in, since that data is static and was produced once. The pipeline
+was:
 
-1. Sample elevation on a 0.02° grid over the frame via the
-   [OpenTopoData](https://www.opentopodata.org/datasets/srtm/) public API
-   (`srtm30m`, 100 locations per request, 1 request/second), then pack the
-   values as little-endian `Int16` and base64.
+1. Fetch the frame from the [GMRT](https://www.gmrt.org/) GridServer as one ESRI
+   ASCII grid, resample onto a 0.005° grid, and pack the values as little-endian
+   `Int16` and base64. GMRT serves a whole bounding box per request rather than
+   metering by the hundred-coordinate call the way the point-query elevation APIs
+   do, so the grid step is a choice about payload and draw cost rather than about
+   quota — its tiers over a box this size run down to about 60 m.
+
+   GMRT carries bathymetry, so the Mediterranean arrives as real depth. Nothing
+   here wants that: the sea is drawn as flat bands clipped to the Natural Earth
+   coastline, and a negative seafloor would drag `elevationRange` down and take
+   the hypsometric ramp with it. Everything below zero outside the Jordan rift is
+   written as 0; inside the rift the real depth is kept, which is what holds the
+   Dead Sea and the Sea of Galilee. Keep that rift box inland if you move it —
+   at 33°N the shore is already out near 35.1°E — and `npm run verify` floors the
+   whole grid at the Dead Sea's own depth to catch it if you do not.
 2. Clip the Natural Earth 10m `land`, `lakes` and `rivers_lake_centerlines`
    layers to the frame, simplify with Douglas–Peucker, and take the coastline as
    the contiguous run of the land ring inside the frame.
@@ -280,8 +297,8 @@ each. Fall back to radial distance when the segment has no length.
 
 ## Sources
 
-- [NASA SRTM](https://www.earthdata.nasa.gov/data/instruments/srtm) — elevation
-- [OpenTopoData](https://www.opentopodata.org/datasets/srtm/) — sampling API
+- [GMRT](https://www.gmrt.org/) — elevation, via its
+  [GridServer](https://www.gmrt.org/services/index.html)
 - [Natural Earth](https://www.naturalearthdata.com/downloads/10m-physical-vectors/)
   — coastline, lakes, river centrelines
 
@@ -304,6 +321,6 @@ Two licences, because this repository holds two kinds of work.
 
 [OpenCC](https://github.com/BYVoid/OpenCC), used at build time only, is Apache 2.0.
 
-The underlying geodata carries no conditions: Natural Earth is public domain and
-SRTM is released by NASA into the public domain. Attribution to both is
+The underlying geodata carries no conditions: Natural Earth is public domain,
+and GMRT is a community synthesis published for open use. Attribution to both is
 customary, and this project gives it here and in the interface.

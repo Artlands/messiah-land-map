@@ -13,6 +13,7 @@
     "build:static": "vite build --config vite.static.config.ts",
     "preview:static": "vite preview --config vite.static.config.ts",
     "verify": "node scripts/verify-map-data.mjs",
+    "build:dem": "node scripts/build-dem.mjs",
     "build:zh": "node scripts/build-zh-hant.mjs",
     "check:en": "node scripts/check-en.mjs",
     "check:view": "node scripts/check-view.mjs"

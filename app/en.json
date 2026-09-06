@@ -1,10 +1,10 @@
 {
   "Amman（旧称拉巴）": "Amman (ancient Rabbah)",
+  "GMRT · 550 m 网格": "GMRT · 550 m grid",
   "Ginosar 平原": "Ginosar plain",
   "Kafr Kanna（另说 Khirbet Qana）": "Kafr Kanna (alt. Khirbet Qana)",
   "Kh. el-Qaryatein（推定）": "Kh. el-Qaryatein (proposed)",
   "Rentis（推定）": "Rentis (proposed)",
-  "SRTM · 2 km 网格": "SRTM · 2 km grid",
   "Tulul Abu el-Alayiq（新城）": "Tulul Abu el-Alayiq (Herodian city)",
   "et-Tell（另说 el-Araj）": "et-Tell (alt. el-Araj)",
   "「在拉玛听见号啕大哭的声音」所引之地。": "The place behind \"a voice was heard in Ramah, weeping and loud lamentation\".",
@@ -12,7 +12,7 @@
   "上一个地点": "Previous place",
   "下一个地点": "Next place",
   "世界最低的陆地裂谷": "The lowest rift on land",
-  "个采样点，经 opentopodata 公开接口获取。 海岸线、加利利海、死海与约旦河等河道中心线：Natural Earth 10m 物理矢量。 死海的利桑海峡在 1979 年前南北盆地相连，本图按一世纪状态合并；米伦湖（Semechonitis）于 1950 年代排干，按历史范围补绘。 公元 30 年前后的分封疆界与古代地名为教育性近似，位置采用今址或学界主流候选地的实测坐标。": "points in all, fetched through the public opentopodata API. Coastline, Sea of Galilee, Dead Sea and the Jordan and other river centrelines: Natural Earth 10m physical vectors. The Dead Sea's Lisan Strait joined the northern and southern basins until 1979, so it is drawn joined here as it was in the first century; Lake Huleh (Semechonitis) was drained in the 1950s and is restored to its historical extent. The tetrarchy borders and ancient place names for c. AD 30 are educational approximations; positions use the measured coordinates of the modern site or of the leading scholarly candidate.",
+  "个采样点，由 GMRT 网格服务一次取得。 海岸线、加利利海、死海与约旦河等河道中心线：Natural Earth 10m 物理矢量。 死海的利桑海峡在 1979 年前南北盆地相连，本图按一世纪状态合并；米伦湖（Semechonitis）于 1950 年代排干，按历史范围补绘。 公元 30 年前后的分封疆界与古代地名为教育性近似，位置采用今址或学界主流候选地的实测坐标。": "points in all, fetched from the GMRT grid service in a single request. Coastline, Sea of Galilee, Dead Sea and the Jordan and other river centrelines: Natural Earth 10m physical vectors. The Dead Sea’s Lisan Strait joined the northern and southern basins until 1979, so it is drawn joined here as it was in the first century; Lake Huleh (Semechonitis) was drained in the 1950s and is restored to its historical extent. The tetrarchy borders and ancient place names for c. AD 30 are educational approximations; positions use the measured coordinates of the modern site or of the leading scholarly candidate.",
   "中央山脊干道上的旧约名城。": "A well-known Old Testament town on the central ridge road.",
   "主导航": "Main navigation",
   "事件类型筛选": "Filter by kind of episode",
@@ -92,7 +92,7 @@
   "因为那里水多": "Because there was much water",
   "地中海": "Mediterranean Sea",
   "地图视图控制": "Map view controls",
-  "地形取自 NASA SRTM 高程模型（按约 2 公里网格取样），海岸线、湖泊与河道取自 Natural Earth 实测矢量，行政分界还原公元 30 年前后的分封格局。转动这片土地，重新理解福音书里的距离与高差。": "The terrain comes from NASA's SRTM elevation model, sampled on a roughly 2 km grid; coastlines, lakes and river courses come from Natural Earth survey vectors; the internal borders reconstruct the tetrarchies as they stood around AD 30. Turn the land over and the distances and climbs in the gospels start to mean something.",
+  "地形取自 GMRT 全球多分辨率地形合成数据集（按约 550 米网格取样），海岸线、湖泊与河道取自 Natural Earth 实测矢量，行政分界还原公元 30 年前后的分封格局。转动这片土地，重新理解福音书里的距离与高差。": "Relief from GMRT, the Global Multi-Resolution Topography synthesis, sampled on a roughly 550 m grid; the coastline, lakes and river courses are surveyed Natural Earth vectors, and the administrative borders restore the tetrarchies as they stood around AD 30. Turn the land over, and the distances and the height differences in the gospels start to read differently.",
   "地形视图 · 方向键平移，Shift + 方向键旋转俯仰，加减号缩放": "Terrain view · arrow keys pan, Shift + arrows orbit, plus and minus zoom",
   "坐标": "Coordinates",
   "垂直方向放大约 5 倍，否则整片高地在这个跨度下几乎是平的。平面位置与高程数值均为实测值。": "Vertical scale is exaggerated about 5×; at this span the whole highland would otherwise look flat. Horizontal positions and elevation figures are the measured values.",
@@ -298,7 +298,7 @@
   "马迦鲁": "Machaerus",
   "骑驴进城的起点": "Where the donkey was fetched",
   "高程图例": "Elevation legend",
-  "高程：NASA SRTM 30 米数字高程模型，按 0.02°（约 2 公里）网格取样，共": "Elevation: NASA SRTM 30 m digital elevation model, sampled on a 0.02° (roughly 2 km) grid —",
+  "高程：GMRT 全球多分辨率地形合成数据集，按 0.005°（约 550 米）网格重采样，共": "Elevation: GMRT, the Global Multi-Resolution Topography synthesis, resampled onto a 0.005° (about 550 m) grid —",
   "黑门山": "Mount Hermon",
   "黑门山南麓的泉源之地，原为潘神圣所。在这座满是异教神龛的城外，彼得宣认耶稣是基督，耶稣随即首次预告受难。": "A place of springs at the southern foot of Mount Hermon, originally a sanctuary of Pan. Outside this town full of pagan shrines Peter confessed Jesus as the Christ, and Jesus first foretold his suffering."
 }

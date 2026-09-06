@@ -6,8 +6,8 @@ import { regionLabels, regions, peaks, lakes } from './geo';
 import { toTraditional } from './zh-hant';
 import { toEnglish } from './en';
 import {
-  clamp, clampPan, drawScene, elevationRange, groundAt, hypsometric, makeFrame, normLat,
-  normLon, project, regionAt, relief, RULER_TINT, TILT, zoomAbout, type Frame, type View,
+  clamp, clampPan, DRAFT_STRIDE, drawScene, elevationRange, groundAt, hypsometric, makeFrame,
+  normLat, normLon, project, regionAt, relief, RULER_TINT, TILT, zoomAbout, type Frame, type View,
 } from './terrain';
 
 const RULERS: { key: keyof typeof RULER_TINT; name: string; note: string }[] = [
@@ -263,8 +263,8 @@ function TerrainCanvas({ view, size, showRegions, highlightRegion }: {
     const frame = makeFrame(view, size.width, size.height);
     const draw = (stride: number) =>
       drawScene(ctx, size.width, size.height, frame, { stride, showRegions, highlightRegion });
-    // Coarse mesh right away so dragging stays responsive, full 2 km mesh once it settles.
-    draw(3);
+    // Coarse mesh right away so dragging stays responsive, full mesh once it settles.
+    draw(DRAFT_STRIDE);
     const id = setTimeout(() => draw(1), 200);
     return () => clearTimeout(id);
   }, [view, size, showRegions, highlightRegion]);
@@ -505,7 +505,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         <div className="hero-copy">
           <div className="eyebrow"><span /> THE LAND OF THE GOSPELS</div>
           <h1>走进耶稣<br />时代的<em>以色列</em></h1>
-          <p>地形取自 NASA SRTM 高程模型（按约 2 公里网格取样），海岸线、湖泊与河道取自 Natural Earth 实测矢量，行政分界还原公元 30 年前后的分封格局。转动这片土地，重新理解福音书里的距离与高差。</p>
+          <p>地形取自 GMRT 全球多分辨率地形合成数据集（按约 550 米网格取样），海岸线、湖泊与河道取自 Natural Earth 实测矢量，行政分界还原公元 30 年前后的分封格局。转动这片土地，重新理解福音书里的距离与高差。</p>
           <button className="primary-button" onClick={() => document.querySelector('#map')?.scrollIntoView({ behavior: 'smooth' })}>
             开始探索 <span>↘</span>
           </button>
@@ -583,7 +583,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
             <span>历史地理档案 · 01</span>
             <h2>福音书中的土地</h2>
             <div className="terrain-stats">
-              30.60–33.75°N <i /> 34.20–36.50°E <i /> SRTM · 2 km 网格
+              30.60–33.75°N <i /> 34.20–36.50°E <i /> GMRT · 550 m 网格
             </div>
           </div>
 
@@ -676,14 +676,14 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         </div>
         <div className="source-note" id="sources">
           <p>
-            高程：NASA SRTM 30 米数字高程模型，按 0.02°（约 2 公里）网格取样，共 {'18,328'} 个采样点，经 opentopodata 公开接口获取。
+            高程：GMRT 全球多分辨率地形合成数据集，按 0.005°（约 550 米）网格重采样，共 {'290,891'} 个采样点，由 GMRT 网格服务一次取得。
             海岸线、加利利海、死海与约旦河等河道中心线：Natural Earth 10m 物理矢量。
             死海的利桑海峡在 1979 年前南北盆地相连，本图按一世纪状态合并；米伦湖（Semechonitis）于 1950 年代排干，按历史范围补绘。
             公元 30 年前后的分封疆界与古代地名为教育性近似，位置采用今址或学界主流候选地的实测坐标。
           </p>
           <div>
-            <a href="https://www.earthdata.nasa.gov/data/instruments/srtm" target="_blank" rel="noreferrer">NASA SRTM ↗</a>
-            <a href="https://www.opentopodata.org/datasets/srtm/" target="_blank" rel="noreferrer">OpenTopoData ↗</a>
+            <a href="https://www.gmrt.org/" target="_blank" rel="noreferrer">GMRT ↗</a>
+            <a href="https://www.gmrt.org/services/index.html" target="_blank" rel="noreferrer">GMRT GridServer ↗</a>
             <a href="https://www.naturalearthdata.com/downloads/10m-physical-vectors/" target="_blank" rel="noreferrer">Natural Earth ↗</a>
           </div>
         </div>

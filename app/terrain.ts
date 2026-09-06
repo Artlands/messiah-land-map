@@ -255,8 +255,29 @@ function pointInRing(lon: number, lat: number, ring: [number, number][]) {
   return inside;
 }
 
+/**
+ * Bounding box per region, so the common case — a point nowhere near this ring —
+ * costs four comparisons instead of a walk round the polygon. The grid below
+ * runs this once per DEM node at module load, which is nearly three hundred
+ * thousand points against ten rings.
+ */
+const regionBox = regions.map(({ ring }) => {
+  let w = Infinity, e = -Infinity, s = Infinity, n = -Infinity;
+  for (const [x, y] of ring) {
+    if (x < w) w = x;
+    if (x > e) e = x;
+    if (y < s) s = y;
+    if (y > n) n = y;
+  }
+  return { w, e, s, n };
+});
+
 export function regionAt(lon: number, lat: number) {
-  for (let i = 0; i < regions.length; i++) if (pointInRing(lon, lat, regions[i].ring)) return i;
+  for (let i = 0; i < regions.length; i++) {
+    const b = regionBox[i];
+    if (lon < b.w || lon > b.e || lat < b.s || lat > b.n) continue;
+    if (pointInRing(lon, lat, regions[i].ring)) return i;
+  }
   return -1;
 }
 
@@ -299,6 +320,14 @@ const lakeGrid = lakeMask();
 
 const SUN = { x: -0.55, y: -0.7, z: 0.45 };
 const SUN_LEN = Math.hypot(SUN.x, SUN.y, SUN.z);
+
+/**
+ * Stride for the pass drawn while the view is still moving. The full mesh is
+ * most of three hundred thousand quads, far too many to redraw inside a drag,
+ * so the interactive pass aims at a fixed cell budget rather than a fixed
+ * stride: change the grid step and dragging stays exactly as responsive.
+ */
+export const DRAFT_STRIDE = Math.max(1, Math.round(Math.sqrt((DEM_NX * DEM_NY) / 15_000)));
 
 export type SceneOptions = {
   stride: number;

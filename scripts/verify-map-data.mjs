@@ -46,6 +46,24 @@ for (const [name, lon, lat, lo, hi] of landmarks) {
   assert.ok(v >= lo && v <= hi, `${name}: DEM says ${v.toFixed(0)} m, expected ${lo}..${hi}`);
 }
 
+// The source carries bathymetry, so a rift box drawn a little too wide quietly
+// preserves open seafloor instead of flattening it to zero — and that would drag
+// elevationRange down and take the hypsometric ramp with it. Negatives are
+// allowed only in the Jordan rift, and never below the floor of the Dead Sea.
+const DEAD_SEA_FLOOR = -800;
+for (let j = 0; j < NY; j++) {
+  for (let i = 0; i < NX; i++) {
+    const v = dem[j * NX + i];
+    if (v >= 0) continue;
+    const lon = W + i * sx;
+    const lat = N - j * sy;
+    assert.ok(lon >= 35.2 && lon <= 35.9 && lat >= 30.6 && lat <= 33.0,
+      `below sea level outside the Jordan rift at ${lon.toFixed(2)}, ${lat.toFixed(2)}: ${v} m`);
+    assert.ok(v >= DEAD_SEA_FLOOR,
+      `${v} m at ${lon.toFixed(2)}, ${lat.toFixed(2)} is below the floor of the Dead Sea`);
+  }
+}
+
 // Every gazetteer entry must sit inside the frame, and its stated elevation must
 // agree with the DEM. A wrong sign or a transposed lon/lat shows up here first.
 const rows = [...places.matchAll(
