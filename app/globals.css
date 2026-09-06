@@ -126,7 +126,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .view-tools button { width: 38px; height: 38px; border: 0; border-bottom: 1px solid var(--line); background: rgba(6,16,19,.7); cursor: pointer; color: #b3b8ae; }
 .view-tools button:last-child { border-bottom: 0; }
 .view-tools button:hover { background: rgba(200,167,93,.16); color: var(--gold-bright); }
-.compass { position: absolute; left: clamp(80px, 10vw, 150px); bottom: 91px; width: 58px; height: 58px; padding: 0; border: 0; background: none; cursor: pointer; }
+.compass { position: absolute; right: clamp(26px, 4vw, 61px); bottom: 74px; width: 58px; height: 58px; padding: 0; border: 0; background: none; cursor: pointer; }
 .compass:hover .compass-ring { border-color: rgba(207,191,153,.5); }
 .compass-ring { width: 100%; height: 100%; border: 1px solid rgba(207,191,153,.23); border-radius: 50%; position: relative; transition: transform .1s; }
 .compass-ring span { position: absolute; left: 50%; transform: translateX(-50%); font: 8px Georgia, serif; }
