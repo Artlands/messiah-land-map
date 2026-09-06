@@ -8,6 +8,11 @@
 // place" when it is nothing of the kind. Seven places clear the bar. The other
 // fifty-five show the card with no video, which is the honest answer.
 //
+// One place here is a traditional site rather than a named one: the gospels do
+// not say which hill the Sermon on the Mount was given from. The gazetteer entry
+// says so plainly, and the video is about the sermon itself, not the hill — so
+// the pairing claims only what it can.
+//
 // Acts stories belong to the sibling map, not this one. Damascus, Joppa,
 // Caesarea, Samaria, Gaza and Lydda carry no gospel reference in the gazetteer
 // for exactly that reason, and no video here either.
@@ -36,6 +41,7 @@ export const videos = {
   baptism: { id: '0k4GbvZUPuo', title: '耶稣的受洗 · 路加福音 3–9', source: 'The Baptism of Jesus: Luke 3-9' },
   crucifixion: { id: '_unHmAf7INk', title: '受难 · 路加福音 19–23', source: 'The Crucifixion of Jesus: Luke 19-23' },
   resurrection: { id: 'Vb24Lk1Oh5M', title: '复活 · 路加福音 24', source: 'The Resurrection of Jesus: Luke 24' },
+  sermon: { id: 'ajwehw_AT0s', title: '登山宝训', source: 'What Jesus Taught in the Sermon on the Mount' },
 } satisfies Record<string, Video>;
 
 export type VideoKey = keyof typeof videos;
@@ -53,4 +59,5 @@ export const placeVideo: Record<string, VideoKey> = {
   jerusalem: 'crucifixion', // 马可福音 11–16 ↔ 路加福音 19–23 — 同一段受难叙事
   olives: 'crucifixion',    // 马可福音 14:26–52 ↔ 路加福音 22:39–53 — 客西马尼与被捕
   emmaus: 'resurrection',   // 路加福音 24:13–35 — 影片正是路加福音 24 章
+  beatitudes: 'sermon',     // 马太福音 5–7 — 影片讲的就是这篇讲论
 };

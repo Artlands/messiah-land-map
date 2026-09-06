@@ -1,6 +1,12 @@
 // First-century gazetteer. Coordinates are the modern WGS-84 positions of the
 // identified (or most widely accepted candidate) sites; elevations are metres
 // above/below mean sea level.
+//
+// A few entries are traditional sites for episodes the gospels never locate —
+// the Sermon on the Mount, the wilderness testing, the feeding of the five
+// thousand. They say so in their own description rather than quietly presenting
+// a Byzantine association as an identification, and they have no `greek`,
+// because there is no first-century name to give.
 
 export type Kind = 'gospel' | 'town' | 'decapolis';
 export type Theme = '生平' | '教导' | '神迹' | '受难周' | '背景';
@@ -8,7 +14,7 @@ export type Theme = '生平' | '教导' | '神迹' | '受难周' | '背景';
 export type Place = {
   id: string;
   name: string;      // 中文
-  greek: string;     // 一世纪名称
+  greek?: string;    // 一世纪名称，传统地点若无古名则从缺
   site?: string;     // 今址
   lon: number;
   lat: number;
@@ -39,6 +45,14 @@ export const places: Place[] = [
     region: '加利利', kind: 'gospel', theme: '教导', date: '加利利事工中心', title: '他自己的城',
     description: '湖西北岸的渔村与关税站，位于通往大马士革的干道旁。马太福音称之为耶稣「自己的城」，加利利事工多以此为基地。',
     reference: '马太福音 4:13；马可福音 1:21–34；2:1–12' },
+  { id: 'beatitudes', name: '八福山', site: 'Mt Eremos（传统地点）', lon: 35.5556, lat: 32.8806, elev: 60,
+    region: '加利利', kind: 'gospel', theme: '教导', date: '加利利事工期间', title: '登山宝训',
+    description: '福音书没有指名这座山。马太只说耶稣「上了山」，路加的平行记载却说他站在「一块平地上」。传统把地点定在迦百农西南约三公里、俯瞰湖面的这道山坡，拜占庭时期已有纪念堂，今日的教堂建于 1938 年。',
+    reference: '马太福音 5–7 章；路加福音 6:17–49' },
+  { id: 'tabgha', name: '七泉', greek: 'ΕΠΤΑΠΗΓΟΝ', site: 'Tabgha（传统地点）', lon: 35.5500, lat: 32.8722, elev: -200,
+    region: '加利利', kind: 'gospel', theme: '神迹', date: '加利利事工期间', title: '五饼二鱼与湖边的早餐',
+    description: '湖西北岸的泉水滩地，希腊名意为「七泉」。传统把五饼二鱼的神迹与复活后湖边的早餐都定在此处，不过路加说前者发生在伯赛大附近。',
+    reference: '路加福音 9:10–17；约翰福音 21:1–14' },
   { id: 'chorazin', name: '哥拉汛', greek: 'ΧΟΡΑΖΙΝ', site: 'Korazim', lon: 35.5640, lat: 32.9105, elev: 260,
     region: '加利利', kind: 'gospel', theme: '教导', date: '加利利事工期间', title: '受责备的城',
     description: '迦百农以北的黑玄武岩村落。与伯赛大、迦百农同被列入「有祸了」的责备。',
@@ -179,6 +193,10 @@ export const places: Place[] = [
     region: '犹太', kind: 'gospel', theme: '教导', date: '最后一次上耶路撒冷', title: '撒该与瞎子',
     description: '约旦河谷的绿洲与冬宫之城，海拔低于海平面约 258 米。由此上耶路撒冷需在约 27 公里内爬升逾一千米。',
     reference: '路加福音 18:35–19:10；马可福音 10:46–52' },
+  { id: 'temptation', name: '试探山', site: 'Jebel Quruntul（传统地点）', lon: 35.4297, lat: 31.8747, elev: 350,
+    region: '犹太', kind: 'gospel', theme: '生平', date: '受洗之后', title: '旷野四十天',
+    description: '福音书只说圣灵把耶稣引到旷野，未指明何处。传统把受试探之地定在耶利哥西侧这道峭壁，从裂谷底一路拔起数百米；十二世纪起崖壁上凿有修道院。',
+    reference: '马太福音 4:1–11；路加福音 4:1–13' },
   { id: 'qumran', name: '昆兰', greek: '—', site: 'Khirbet Qumran', lon: 35.4590, lat: 31.7410, elev: -320,
     region: '犹太', kind: 'town', theme: '背景', description: '死海西北岸的隐居社群聚落，死海古卷的出土地。' },
   { id: 'engedi', name: '隐基底', greek: 'ΕΓΓΑΔΔΙ', site: 'Ein Gedi', lon: 35.3900, lat: 31.4610, elev: -100,

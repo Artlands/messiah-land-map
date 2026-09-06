@@ -585,7 +585,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
               aria-label={place.name}
             >
               <span className="marker-dot"><i /></span>
-              <span className="marker-label"><b>{place.name}</b><small>{place.greek}</small></span>
+              <span className="marker-label"><b>{place.name}</b>{place.greek && <small>{place.greek}</small>}</span>
             </button>
           ))}
 
@@ -642,7 +642,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
             </div>
             <div className="panel-tag">{active.region} · {active.theme}</div>
             <h3>{active.name}</h3>
-            <div className="ancient-name">{active.greek}</div>
+            {active.greek && <div className="ancient-name">{active.greek}</div>}
             {active.site && <div className="modern-site">今址 · {active.site}</div>}
             <div className="story-rule"><span /></div>
             {active.title && <p className="story-title">{active.title}</p>}
