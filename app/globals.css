@@ -161,10 +161,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .reference b, .date-row b { display: block; margin-top: 5px; color: #c8c2b2; font-size: 10px; font-weight: 400; letter-spacing: .06em; }
 .date-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
 .date-row > span { color: var(--gold); }
-.panel-nav { display: grid; grid-template-columns: 30px 1fr 30px; align-items: center; gap: 10px; margin-top: 25px; padding-top: 18px; border-top: 1px solid var(--line); }
+/* minmax(0, 1fr), not 1fr: a bare `1fr` is `minmax(auto, 1fr)`, and that
+   automatic minimum will not let the track fall below the min-content width of
+   what sits in it. With one dot per gospel site that comes to 211px against the
+   185px the panel has, so the track wins, and the 26px it takes comes out of the
+   panel's right padding — the next-place arrow ends up hard against the edge of
+   the box, and touching it once the panel narrows. The floor of 0 lets the track
+   shrink, and wrapping is what the dots do with the shortfall, which keeps
+   holding however many sites the gazetteer grows to. */
+.panel-nav { display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; gap: 10px; margin-top: 25px; padding-top: 18px; border-top: 1px solid var(--line); }
 .panel-nav button { border: 0; background: none; color: #8b958f; cursor: pointer; font-size: 16px; }
-.panel-nav div { display: flex; justify-content: center; gap: 5px; }
-.panel-nav i { width: 4px; height: 4px; border-radius: 50%; background: #3e4a46; }
+.panel-nav div { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+.panel-nav i { flex: none; width: 4px; height: 4px; border-radius: 50%; background: #3e4a46; }
 .panel-nav i.active { background: var(--gold); }
 .guide { padding: 120px clamp(24px, 8vw, 130px) 80px; background: #ece7db; color: #17201c; }
 .guide .eyebrow { color: #927437; }
