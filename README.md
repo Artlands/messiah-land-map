@@ -296,10 +296,21 @@ each. Fall back to radial distance when the segment has no length.
 
 ## Videos
 
-Each place with a story worth watching carries one BibleProject video, from
-`app/videos.ts`: a catalogue of 15, mapped onto 39 of the 62 places. A place with
-nothing genuinely about it shows no video, which is a better answer than
-stretching a book overview to cover a village.
+Seven places carry a BibleProject video, from `app/videos.ts`. The bar is
+deliberately high: a video goes in only when it narrates the episode that
+happened at that place.
+
+That bar excludes most of the map, and it should. BibleProject makes book
+overviews, theme videos, and a handful of narrative episode videos — it does not
+make videos about towns. An overview of Mark is not a video about Gadara, and
+putting one there tells the reader "here is the story of this place" when it is
+nothing of the kind. Four videos clear the bar, covering the birth, the baptism,
+the passion and the resurrection; the other fifty-five places show the card with
+no video.
+
+Acts stories belong to the sibling map. Damascus, Joppa, Caesarea, Samaria, Gaza
+and Lydda carry no gospel reference in the gazetteer for exactly that reason, and
+no video here either.
 
 Nothing is requested from YouTube until a reader asks for it. The panel shows a
 poster; the `<iframe>` is only created on click, and it is keyed by place id so

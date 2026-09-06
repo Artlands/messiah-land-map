@@ -17,11 +17,15 @@ const placesTs = read('app/places.ts');
 const catalogue = [...videosTs.matchAll(
   /^ {2}(\w+): \{ id: '([\w-]{11})', title: '([^']*)', source: (?:'([^']*)'|"([^"]*)") \},$/gm,
 )].map(([, key, id, title, s1, s2]) => ({ key, id, title, source: s1 ?? s2 }));
-assert.ok(catalogue.length >= 10, `expected the video catalogue, parsed ${catalogue.length}`);
+// A floor of one, not of ten: the point is to catch the regex drifting off the
+// file's shape, and how many videos there are is an editorial decision that has
+// already moved once.
+assert.ok(catalogue.length > 0, 'parsed no videos — has app/videos.ts changed shape?');
 
-const mapping = [...videosTs.matchAll(/^ {2}'?([\w-]+)'?: '(\w+)',$/gm)]
+// Each mapping line carries a trailing comment naming the passage that earns it.
+const mapping = [...videosTs.matchAll(/^ {2}'?([\w-]+)'?: '(\w+)',(?:\s*\/\/.*)?$/gm)]
   .map(([, place, key]) => ({ place, key }));
-assert.ok(mapping.length >= 20, `expected the place mapping, parsed ${mapping.length}`);
+assert.ok(mapping.length > 0, 'parsed no place mappings — has app/videos.ts changed shape?');
 
 // Ids must be unique: two places may share a video, but a video listed twice
 // under different keys means the catalogue has drifted.
