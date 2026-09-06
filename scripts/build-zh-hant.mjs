@@ -8,7 +8,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import * as OpenCC from 'opencc-js';
 
-const SOURCES = ['app/page.tsx', 'app/places.ts', 'app/geo.ts'];
+const SOURCES = ['app/page.tsx', 'app/places.ts', 'app/geo.ts', 'app/videos.ts'];
 
 // OpenCC has no context beyond its phrase dictionary, and a few of our terms
 // have a preferred Taiwanese form it does not pick. Tune here, nowhere else.

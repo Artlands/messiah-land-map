@@ -213,6 +213,7 @@ npm run verify           # check the generated map data
 npm run build:zh         # regenerate the Traditional Chinese table
 npm run check:en         # check the English table is complete
 npm run check:view       # check the pan/zoom maths
+npm run check:videos     # check the embedded videos still resolve
 npm run lint
 ```
 
@@ -293,6 +294,46 @@ the first and last points coincide and the perpendicular-distance term collapses
 to zero — it silently reduced the Sea of Galilee and the Dead Sea to two points
 each. Fall back to radial distance when the segment has no length.
 
+## Videos
+
+Seven places carry a BibleProject video, from `app/videos.ts`. The bar is
+deliberately high: a video goes in only when it narrates the episode that
+happened at that place.
+
+That bar excludes most of the map, and it should. BibleProject makes book
+overviews, theme videos, and a handful of narrative episode videos — it does not
+make videos about towns. An overview of Mark is not a video about Gadara, and
+putting one there tells the reader "here is the story of this place" when it is
+nothing of the kind. Four videos clear the bar, covering the birth, the baptism,
+the passion and the resurrection; the other fifty-five places show the card with
+no video.
+
+Acts stories belong to the sibling map. Damascus, Joppa, Caesarea, Samaria, Gaza
+and Lydda carry no gospel reference in the gazetteer for exactly that reason, and
+no video here either.
+
+Nothing is requested from YouTube until a reader asks for it. The panel shows a
+poster; the `<iframe>` is only created on click, and it is keyed by place id so
+moving to another site takes the player back down. The poster deliberately has
+no thumbnail — an image from `i.ytimg.com` would tell Google about everyone who
+merely opened a panel, which is the thing the lazy embed exists to avoid. The
+embed itself goes to `youtube-nocookie.com`.
+
+`npm run check:videos` is the guard. Three things can rot here and none of them
+show up in a type check: an id can be mistyped, a video can be pulled or made
+private, and a channel can rename or reupload. YouTube's oEmbed endpoint answers
+all three without an API key — it 404s on anything not publicly playable and it
+reports the channel — so the check asserts every id still resolves and still
+belongs to BibleProject. It also holds the mapping honest: every place named must
+exist in the gazetteer, every video referenced must exist in the catalogue, and
+every video in the catalogue must be used by something.
+
+CI runs it on every push but is not allowed to fail the build on it, since an
+outage at YouTube is no reason to stop shipping terrain.
+
+BibleProject is not affiliated with this map. The videos are embedded and
+credited in the panel, never rehosted.
+
 ---
 
 ## Sources
@@ -301,6 +342,7 @@ each. Fall back to radial distance when the segment has no length.
   [GridServer](https://www.gmrt.org/services/index.html)
 - [Natural Earth](https://www.naturalearthdata.com/downloads/10m-physical-vectors/)
   — coastline, lakes, river centrelines
+- [BibleProject](https://www.youtube.com/@bibleproject) — the embedded videos
 
 Ancient place names and regional boundaries follow standard historical atlases of
 Roman Palestine. Where a site has competing identifications — Cana, Emmaus,

@@ -5,6 +5,7 @@ import { places, themes, type Place, type ThemeFilter } from './places';
 import { regionLabels, regions, peaks, lakes } from './geo';
 import { toTraditional } from './zh-hant';
 import { toEnglish } from './en';
+import { placeVideo, videos } from './videos';
 import {
   clamp, clampPan, DRAFT_STRIDE, drawScene, elevationRange, groundAt, hypsometric, makeFrame,
   normLat, normLon, project, regionAt, relief, RULER_TINT, TILT, zoomAbout, type Frame, type View,
@@ -291,6 +292,13 @@ export default function Home() {
   const [showRegions, setShowRegions] = useState(true);
   const [showTowns, setShowTowns] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
+  /**
+   * Nothing is requested from YouTube until this is set. An iframe per panel
+   * would pull a player, its cookies and a few hundred kilobytes on every
+   * place you click, so the embed only exists once someone asks for it — and
+   * it is keyed by place id so moving to another site puts the poster back.
+   */
+  const [playing, setPlaying] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>(() => {
     const saved = typeof window !== 'undefined' && localStorage.getItem('script');
     return saved === 'hant' || saved === 'en' ? saved : 'hans';
@@ -303,6 +311,8 @@ export default function Home() {
   const frame: Frame = useMemo(() => makeFrame(view, size.width, size.height), [view, size]);
 
   const highlightRegion = useMemo(() => regionAt(active.lon, active.lat), [active]);
+
+  const video = placeVideo[active.id] ? videos[placeVideo[active.id]] : null;
 
   const visible = useMemo(
     () => places.filter((p) => {
@@ -575,7 +585,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
               aria-label={place.name}
             >
               <span className="marker-dot"><i /></span>
-              <span className="marker-label"><b>{place.name}</b><small>{place.greek}</small></span>
+              <span className="marker-label"><b>{place.name}</b>{place.greek && <small>{place.greek}</small>}</span>
             </button>
           ))}
 
@@ -632,13 +642,39 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
             </div>
             <div className="panel-tag">{active.region} · {active.theme}</div>
             <h3>{active.name}</h3>
-            <div className="ancient-name">{active.greek}</div>
+            {active.greek && <div className="ancient-name">{active.greek}</div>}
             {active.site && <div className="modern-site">今址 · {active.site}</div>}
             <div className="story-rule"><span /></div>
             {active.title && <p className="story-title">{active.title}</p>}
             <p className="story-description">{active.description}</p>
             {active.reference && (
               <div className="reference"><small>经文索引</small><b>{active.reference}</b></div>
+            )}
+            {video && (
+              <div className="video">
+                {playing === active.id ? (
+                  <iframe
+                    className="video-frame"
+                    src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&rel=0`}
+                    title={video.source}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <button className="video-open" onClick={() => setPlaying(active.id)}>
+                    <span className="video-play"><i /></span>
+                    <span className="video-name"><b>{video.title}</b><small>{video.source}</small></span>
+                  </button>
+                )}
+                <a
+                  className="video-credit"
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  影片来源 · BibleProject ↗
+                </a>
+              </div>
             )}
             {active.date && (
               <div className="date-row"><span>◷</span><div><small>时间线</small><b>{active.date}</b></div></div>

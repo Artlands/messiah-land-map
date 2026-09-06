@@ -8,7 +8,7 @@
 // the runtime looks up a DOM text node.
 import { readFileSync } from 'node:fs';
 
-const SOURCES = ['app/page.tsx', 'app/places.ts', 'app/geo.ts'];
+const SOURCES = ['app/page.tsx', 'app/places.ts', 'app/geo.ts', 'app/videos.ts'];
 const read = (f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
 const hasHan = (s) => /[一-鿿]/.test(s);
