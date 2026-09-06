@@ -315,3 +315,30 @@ footer a { justify-self: end; }
 
 /* Chinese runs the two halves of these headings together; English needs a gap. */
 :root[lang="en"] .hero h1 em, :root[lang="en"] .guide h2 em { margin-left: .25em; }
+
+/* ---- the BibleProject embed ---- */
+.video { margin-top: 20px; }
+/* The poster. No thumbnail is fetched for it: an image from i.ytimg.com would
+   tell Google about every reader who merely opened a panel, which is the thing
+   the lazy embed exists to avoid. */
+.video-open {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 12px 13px; border: 1px solid rgba(202,170,96,.26);
+  background: rgba(200,167,93,.07); cursor: pointer; text-align: left;
+  transition: border-color .2s, background .2s;
+}
+.video-open:hover { border-color: rgba(202,170,96,.55); background: rgba(200,167,93,.13); }
+.video-play {
+  flex: 0 0 auto; display: grid; place-items: center; width: 30px; height: 30px;
+  border: 1px solid var(--gold); border-radius: 50%;
+}
+.video-play i {
+  width: 0; height: 0; margin-left: 3px;
+  border: 6px solid transparent; border-left: 9px solid var(--gold-bright); border-right: 0;
+}
+.video-name { min-width: 0; }
+.video-name b { display: block; color: #ded7c7; font: 400 11px/1.5 Georgia, "Songti SC", serif; letter-spacing: .06em; }
+.video-name small { display: block; margin-top: 3px; color: #7d877f; font-size: 8px; letter-spacing: .04em; }
+.video-frame { display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid rgba(202,170,96,.26); }
+.video-credit { display: block; margin-top: 8px; color: #6f7b74; font-size: 8px; letter-spacing: .1em; }
+.video-credit:hover { color: var(--gold); }

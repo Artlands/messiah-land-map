@@ -16,7 +16,8 @@
     "build:dem": "node scripts/build-dem.mjs",
     "build:zh": "node scripts/build-zh-hant.mjs",
     "check:en": "node scripts/check-en.mjs",
-    "check:view": "node scripts/check-view.mjs"
+    "check:view": "node scripts/check-view.mjs",
+    "check:videos": "node scripts/check-videos.mjs"
   },
   "dependencies": {
     "next": "16.2.6",
