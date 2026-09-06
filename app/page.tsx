@@ -38,6 +38,9 @@ const SEA_LABEL = { lon: 34.56, lat: 32.7 };
 /** Kept out of the JSX so the English-table extractor sees one plain literal. */
 const STAGE_LABEL = '地形视图 · 方向键平移，Shift + 方向键旋转俯仰，加减号缩放';
 
+/** Travel, in pixels, past which a press is a drag rather than a click. */
+const DRAG = 4;
+
 const DEFAULT_VIEW: View = { rotation: -0.1, tilt: 0.62, zoom: 1, perspective: false, panX: 0, panY: 0 };
 
 /**
@@ -102,6 +105,17 @@ function useEarthControls(
       el.dataset.grab = mode;
     };
 
+    /**
+     * Capture once the gesture is a drag, never on the first move. A captured
+     * pointer retargets its click to the capturing element, and a hand moves a
+     * pixel or two inside every click, so capturing eagerly means a site is
+     * never selected. One threshold decides both, so a gesture either captures
+     * and has its click suppressed, or does neither.
+     */
+    const hold = (pointerId: number) => {
+      if (travel > DRAG && !el.hasPointerCapture(pointerId)) el.setPointerCapture(pointerId);
+    };
+
     const onPointerDown = (e: PointerEvent) => {
       // Before the bail, not after: a press on an overlay control still has to
       // clear the previous gesture, or the click suppression below eats it.
@@ -120,16 +134,13 @@ function useEarthControls(
     const onPointerMove = (e: PointerEvent) => {
       if (!pointers.has(e.pointerId)) return;
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      // Capture on the first move rather than on press: a captured pointer
-      // retargets its click to the capturing element, which would stop a
-      // marker from ever seeing the click that selects it.
-      if (!el.hasPointerCapture(e.pointerId)) el.setPointerCapture(e.pointerId);
 
       if (pointers.size >= 2 && pinch) {
         const now = twoFinger();
         const was = pinch;
         pinch = now;
-        travel = 8;
+        travel = DRAG + 1;
+        hold(e.pointerId);
         setView((v) => ({
           ...v,
           rotation: v.rotation + (now.angle - was.angle),
@@ -144,6 +155,7 @@ function useEarthControls(
       const dx = e.clientX - drag.x;
       const dy = e.clientY - drag.y;
       travel = Math.max(travel, Math.hypot(dx, dy));
+      hold(e.pointerId);
       const from = drag.from;
       if (drag.mode === 'pan') {
         setView((v) => ({
@@ -184,7 +196,7 @@ function useEarthControls(
 
     // A pan that ends over a marker must not also select it.
     const onClickCapture = (e: MouseEvent) => {
-      if (travel > 4) { e.stopPropagation(); e.preventDefault(); }
+      if (travel > DRAG) { e.stopPropagation(); e.preventDefault(); }
     };
 
     const onDoubleClick = (e: MouseEvent) => {
