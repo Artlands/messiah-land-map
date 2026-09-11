@@ -5,8 +5,8 @@ data rather than decorative terrain. Pan the land, tilt the horizon, and read
 the Gospel narratives against the distances and height differences they actually
 happened in.
 
-**Live:** https://lijie.me/messiah-land-map/ (also at
-https://artlands.github.io/messiah-land-map/)
+**Live:** https://slashai.app/messiah-land-map/ (also at
+https://nullbotnone.github.io/messiah-land-map/)
 
 The interface reads in Simplified Chinese, Traditional Chinese or English;
 this document is the technical reference.
