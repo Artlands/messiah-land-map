@@ -355,7 +355,7 @@ silently.
 
 Two licences, because this repository holds two kinds of work.
 
-- **Code** — MIT. See [`LICENSE`](LICENSE).
+- **Code** — Apache 2.0. See [`LICENSE`](LICENSE).
 - **Map content** — CC BY 4.0. See [`LICENSE-CONTENT`](LICENSE-CONTENT). This
   covers the place descriptions in `app/places.ts` and their English translations
   in `app/en.json`, the regional boundary polygons, and the written sections of
